@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relax Chillax — Deal Refresher</title>
+<style>
+  /* ── Reset & tokens ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0f172a;
+    --surface:   #1e293b;
+    --surface2:  #263449;
+    --border:    #334155;
+    --gold:      #c9973b;
+    --gold-lite: #f5c842;
+    --text:      #e2e8f0;
+    --muted:     #94a3b8;
+    --green:     #22c55e;
+    --amber:     #f59e0b;
+    --red:       #ef4444;
+    --blue:      #3b82f6;
+    --radius:    10px;
+    --font:      system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Top bar ────────────────────────────────────────────────── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-logo svg { width: 34px; height: 34px; }
+
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.3px;
+  }
+
+  .topbar-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .topbar-spacer { flex: 1; }
+
+  .topbar-stats {
+    display: flex;
+    gap: 18px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .topbar-stats strong { color: var(--text); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-gold   { background: var(--gold); color: #fff; }
+  .btn-ghost  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-red    { background: var(--red); color: #fff; }
+  .btn-green  { background: var(--green); color: #fff; }
+  .btn-blue   { background: var(--blue); color: #fff; }
+  .btn-sm     { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+
+  /* ── Layout: three columns ──────────────────────────────────── */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr 320px;
+    grid-template-rows: 1fr;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Left sidebar: chain list ───────────────────────────────── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chain-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+
+  .chain-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-size: 12px;
+  }
+  .chain-item:hover { background: var(--surface2); }
+  .chain-item.selected { background: rgba(201,151,59,0.12); }
+
+  .chain-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--border);
+  }
+  .chain-dot.green  { background: var(--green); }
+  .chain-dot.amber  { background: var(--amber); }
+  .chain-dot.red    { background: var(--red); }
+
+  .chain-name { flex: 1; }
+
+  .chain-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+  .chain-badge.has-deals { background: rgba(34,197,94,0.15); color: var(--green); }
+
+  .tier-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px 3px;
+  }
+
+  .sidebar-actions {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+  }
+
+  /* ── Center: scrape results & progress ──────────────────────── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .main-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .main-toolbar-title {
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  /* progress bar */
+  .progress-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    display: none;
+  }
+  .progress-bar-wrap.visible { display: block; }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.25s ease;
+  }
+
+  /* result cards area */
+  .result-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    color: var(--muted);
+  }
+
+  .empty-state-icon { font-size: 48px; }
+  .empty-state-text { font-size: 14px; }
+  .empty-state-sub  { font-size: 12px; }
+
+  /* ── Result chain groups ─────────────────────────────────────── */
+  .result-group {
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .result-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: var(--surface2);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .status-pill {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+  .status-ok      { background: rgba(34,197,94,0.15);  color: var(--green); }
+  .status-blocked { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .status-error   { background: rgba(239,68,68,0.15);  color: var(--red); }
+  .status-noDeals { background: rgba(148,163,184,0.1); color: var(--muted); }
+  .status-pending { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+  .result-deal-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .result-deal-row input[type="checkbox"] {
+    margin-top: 2px;
+    accent-color: var(--gold);
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .result-deal-info { flex: 1; min-width: 0; }
+
+  .result-deal-title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .result-deal-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+  }
+
+  .deal-tag {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+  .deal-tag.gold { background: rgba(201,151,59,0.15); color: var(--gold); }
+
+  .result-deal-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  /* spinning loader */
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Right panel: current deals.md viewer ───────────────────── */
+  .panel {
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .panel-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .panel-header-spacer { flex: 1; }
+
+  .panel-search {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-search input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    padding: 5px 9px;
+    outline: none;
+  }
+  .panel-search input::placeholder { color: var(--muted); }
+  .panel-search input:focus { border-color: var(--gold); }
+
+  .panel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+
+  .panel-deal-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(51,65,85,0.5);
+    cursor: default;
+    transition: background 0.12s;
+  }
+  .panel-deal-item:hover { background: var(--surface2); }
+  .panel-deal-item:last-child { border-bottom: none; }
+
+  .panel-deal-title {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .panel-deal-chain {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .panel-deal-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 5px;
+  }
+
+  .panel-footer {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+  }
+
+  /* ── Log strip at bottom ────────────────────────────────────── */
+  .log-strip {
+    padding: 5px 16px;
+    background: #0b1120;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Scrollbars ─────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* ── Edit modal ─────────────────────────────────────────────── */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    display: none;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 540px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .modal-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--gold);
+  }
+
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .field input, .field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    padding: 6px 9px;
+    outline: none;
+    font-family: inherit;
+  }
+  .field textarea { min-height: 70px; resize: vertical; }
+  .field input:focus, .field textarea:focus { border-color: var(--gold); }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--text);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ──────────────────────────────────────────────── -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+      <circle cx="26" cy="26" r="26" fill="#A8802A"/>
+      <rect x="10" y="13" width="3.5" height="24" rx="1.75" fill="white"/>
+      <rect x="38.5" y="13" width="3.5" height="24" rx="1.75" fill="white"/>
+      <path d="M13.5 21 Q26 40 38.5 21 L13.5 21 Z" fill="white"/>
+      <line x1="13.5" y1="20" x2="38.5" y2="20" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="topbar-title">Relax Chillax — Deal Refresher</div>
+      <div class="topbar-sub">Scrape hotel chains · Update deals.md</div>
+    </div>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-stats">
+    <span>deals.md: <strong id="statTotal">—</strong> deals</span>
+    <span>Chains: <strong id="statChains">—</strong></span>
+  </div>
+  <button class="btn btn-ghost btn-sm" onclick="openDealsMd()">✏️ Open deals.md</button>
+  <button class="btn btn-ghost btn-sm" onclick="showDealsMd()">📁 Show in Explorer</button>
+  <button id="btnScrapeAll" class="btn btn-gold" onclick="startScrapeAll()">
+    ▶ Scrape All Chains
+  </button>
+</div>
+
+<!-- ── Main layout ───────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Left sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      Chains
+      <span id="sidebarChainCount" style="color:var(--text);font-size:11px;">0</span>
+    </div>
+    <div class="chain-list" id="chainList"></div>
+    <div class="sidebar-actions">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="scrapeSelected()">▶ Scrape Selected</button>
+      <button class="btn btn-ghost btn-sm" onclick="selectAll()">All</button>
+      <button class="btn btn-ghost btn-sm" onclick="selectNone()">None</button>
+    </div>
+  </div>
+
+  <!-- Center: results -->
+  <div class="main">
+    <div class="main-toolbar">
+      <span class="main-toolbar-title" id="mainTitle">Select chains or click "Scrape All"</span>
+      <button id="btnAcceptAll" class="btn btn-green btn-sm" style="display:none" onclick="acceptAllChecked()">✔ Add All Checked</button>
+      <button id="btnClearResults" class="btn btn-ghost btn-sm" style="display:none" onclick="clearResults()">✕ Clear</button>
+    </div>
+    <div class="progress-bar-wrap" id="progressBar">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="result-area" id="resultArea">
+      <div class="empty-state">
+        <div class="empty-state-icon">🏨</div>
+        <div class="empty-state-text">No results yet</div>
+        <div class="empty-state-sub">Scrape chains to find new deals</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel: current deals -->
+  <div class="panel">
+    <div class="panel-header">
+      Current Deals
+      <div class="panel-header-spacer"></div>
+      <span id="panelCount" style="color:var(--text);font-size:11px;">0</span>
+    </div>
+    <div class="panel-search">
+      <input type="text" id="panelSearch" placeholder="Search deals…" oninput="renderPanel()">
+    </div>
+    <div class="panel-list" id="panelList"></div>
+    <div class="panel-footer">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="reloadPanel()">↻ Reload</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Log strip ─────────────────────────────────────────────── -->
+<div class="log-strip" id="logStrip">Ready.</div>
+
+<!-- ── Edit Modal ────────────────────────────────────────────── -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal">
+    <div class="modal-title" id="editModalTitle">Edit Deal</div>
+    <div class="field"><label>Title</label><input id="ef_title" type="text"></div>
+    <div class="field"><label>Chain</label><input id="ef_chain" type="text"></div>
+    <div class="field"><label>Chain Slug</label><input id="ef_chainSlug" type="text"></div>
+    <div class="field"><label>Tier (1–4)</label><input id="ef_tier" type="number" min="1" max="4"></div>
+    <div class="field"><label>Discount Label</label><input id="ef_discount" type="text"></div>
+    <div class="field"><label>Discount % (number)</label><input id="ef_discountPct" type="number" min="0" max="90"></div>
+    <div class="field"><label>Valid Until (YYYY-MM-DD)</label><input id="ef_validUntil" type="text"></div>
+    <div class="field"><label>Image URL</label><input id="ef_imageUrl" type="text"></div>
+    <div class="field"><label>Image Alt</label><input id="ef_imageAlt" type="text"></div>
+    <div class="field"><label>Booking URL</label><input id="ef_bookingUrl" type="text"></div>
+    <div class="field"><label>Location</label><input id="ef_location" type="text"></div>
+    <div class="field"><label>Tags (comma-separated)</label><input id="ef_tags" type="text"></div>
+    <div class="field"><label>Description</label><textarea id="ef_description"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────
+let chains        = [];
+let currentDeals  = [];   // deals.md content
+let scrapeResults = {};   // slug → result
+let selectedSlugs = new Set();
+let scraping      = false;
+let scrapeTotal   = 0;
+let scrapeDone    = 0;
+
+let modalMode  = null;    // 'edit-result' | 'edit-existing'
+let modalSlug  = null;    // for result deals
+let modalTitle = null;    // original title for existing deals
+let modalDealRef = null;  // reference to deal object
+
+// ── Boot ─────────────────────────────────────────────────────────────────
+async function boot() {
+  chains = await window.api.getChains();
+  renderSidebar();
+  await reloadPanel();
+  log('Ready — ' + chains.length + ' chains loaded.');
+
+  window.api.onScrapeProgress(onProgress);
+}
+
+// ── Sidebar ──────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const tiers = [...new Set(chains.map(c => c.tier))].sort();
+  const listEl = document.getElementById('chainList');
+  listEl.innerHTML = '';
+
+  for (const tier of tiers) {
+    const label = document.createElement('div');
+    label.className = 'tier-label';
+    label.textContent = `Tier ${tier}`;
+    listEl.appendChild(label);
+
+    for (const c of chains.filter(ch => ch.tier === tier)) {
+      const item = document.createElement('div');
+      item.className = 'chain-item' + (selectedSlugs.has(c.slug) ? ' selected' : '');
+      item.dataset.slug = c.slug;
+      item.onclick = () => toggleChain(c.slug, item);
+
+      const res = scrapeResults[c.slug];
+      const dotClass = !res ? '' :
+        res.status === 'ok'      ? 'green' :
+        res.status === 'blocked' ? 'amber' : 'red';
+
+      const dealCount = (currentDeals.filter(d => d.chainSlug === c.slug).length);
+      const newDeals  = res ? res.deals.length : 0;
+
+      item.innerHTML = `
+        <div class="chain-dot ${dotClass}"></div>
+        <span class="chain-name">${c.name}</span>
+        ${newDeals ? `<span class="chain-badge has-deals">+${newDeals}</span>` : dealCount ? `<span class="chain-badge">${dealCount}</span>` : ''}
+        ${res && res.status !== 'ok' && res.status !== 'pending' ? `<span style="font-size:9px;color:var(--red)">●</span>` : ''}
+      `;
+      listEl.appendChild(item);
+    }
+  }
+  document.getElementById('sidebarChainCount').textContent = chains.length;
+}
+
+function toggleChain(slug, item) {
+  if (selectedSlugs.has(slug)) { selectedSlugs.delete(slug); item.classList.remove('selected'); }
+  else { selectedSlugs.add(slug); item.classList.add('selected'); }
+}
+
+function selectAll()  { selectedSlugs = new Set(chains.map(c => c.slug)); renderSidebar(); }
+function selectNone() { selectedSlugs.clear(); renderSidebar(); }
+
+// ── Scraping ─────────────────────────────────────────────────────────────
+async function startScrapeAll() {
+  if (scraping) return;
+  selectedSlugs = new Set(chains.map(c => c.slug));
+  renderSidebar();
+  beginScrape(null);
+}
+
+async function scrapeSelected() {
+  if (scraping) return;
+  if (!selectedSlugs.size) { toast('Select at least one chain first.'); return; }
+  beginScrape([...selectedSlugs]);
+}
+
+function beginScrape(slugs) {
+  scraping = true;
+  scrapeTotal = slugs ? slugs.length : chains.length;
+  scrapeDone  = 0;
+
+  document.getElementById('btnScrapeAll').disabled = true;
+  document.getElementById('progressBar').classList.add('visible');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('mainTitle').textContent = 'Scraping…';
+  document.getElementById('btnAcceptAll').style.display = 'none';
+  document.getElementById('btnClearResults').style.display = 'none';
+  document.getElementById('resultArea').innerHTML = '';
+
+  window.api.startScrape(slugs);
+}
+
+function onProgress(data) {
+  if (data.type === 'start') {
+    log(`Starting scrape of ${data.total} chains…`);
+    return;
+  }
+
+  if (data.type === 'result') {
+    scrapeResults[data.slug] = {
+      slug: data.slug, name: data.name, tier: data.tier,
+      status: data.status, deals: data.deals || [], error: data.error,
+    };
+    scrapeDone++;
+    const pct = Math.round((scrapeDone / scrapeTotal) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    log(`[${scrapeDone}/${scrapeTotal}] ${data.name} — ${data.status}${data.error ? ' (' + data.error + ')' : ''}${data.deals?.length ? ' · ' + data.deals.length + ' deal(s) found' : ''}`);
+    renderResultGroup(data.slug);
+    renderSidebar();
+    return;
+  }
+
+  if (data.type === 'done') {
+    scraping = false;
+    document.getElementById('btnScrapeAll').disabled = false;
+    document.getElementById('progressBar').classList.remove('visible');
+
+    const total = Object.values(scrapeResults).reduce((s, r) => s + r.deals.length, 0);
+    document.getElementById('mainTitle').textContent =
+      `Scrape complete — ${total} deal(s) found across ${scrapeTotal} chain(s)`;
+
+    if (total > 0) {
+      document.getElementById('btnAcceptAll').style.display = '';
+      document.getElementById('btnClearResults').style.display = '';
+    } else {
+      document.getElementById('btnClearResults').style.display = '';
+    }
+    log(`Scrape complete. ${total} new deal(s) found.`);
+  }
+}
+
+// ── Result rendering ──────────────────────────────────────────────────────
+function renderResultGroup(slug) {
+  const res = scrapeResults[slug];
+  if (!res) return;
+  const area = document.getElementById('resultArea');
+
+  // Remove existing group for this slug
+  const existing = area.querySelector(`[data-result-slug="${slug}"]`);
+  if (existing) existing.remove();
+
+  const group = document.createElement('div');
+  group.className = 'result-group';
+  group.dataset.resultSlug = slug;
+
+  const statusMap = {
+    ok: 'status-ok', blocked: 'status-blocked',
+    error: 'status-error', 'no-deals': 'status-noDeals', pending: 'status-pending',
+  };
+  const statusLabel = {
+    ok: '✓ ' + res.deals.length + ' deal(s)', blocked: '⊘ Blocked',
+    error: '✕ Error', 'no-deals': '— No Deals', pending: '… Pending',
+  };
+
+  group.innerHTML = `
+    <div class="result-group-header">
+      <span>${res.name}</span>
+      <span class="status-pill ${statusMap[res.status] || ''}">${statusLabel[res.status] || res.status}</span>
+      ${res.error ? `<span style="color:var(--muted);font-size:10px;">${res.error}</span>` : ''}
+    </div>
+  `;
+
+  if (res.deals.length) {
+    for (let i = 0; i < res.deals.length; i++) {
+      const deal = res.deals[i];
+      const row = document.createElement('div');
+      row.className = 'result-deal-row';
+      row.dataset.slug  = slug;
+      row.dataset.index = i;
+
+      const tags = (deal.tags || []).map(t => `<span class="deal-tag">${t}</span>`).join('');
+      const disc = deal.discountPct ? `<span class="deal-tag gold">${deal.discount}</span>` : '';
+      const exp  = deal.validUntil  ? `<span class="deal-tag">Until ${deal.validUntil}</span>` : '';
+
+      row.innerHTML = `
+        <input type="checkbox" checked>
+        <div class="result-deal-info">
+          <div class="result-deal-title" title="${esc(deal.title)}">${esc(deal.title)}</div>
+          <div class="result-deal-meta">${disc}${exp}${tags}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">${esc((deal.description || '').slice(0,120))}…</div>
+        </div>
+        <div class="result-deal-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editResultDeal('${slug}',${i})">✎</button>
+          <button class="btn btn-green btn-sm" onclick="acceptOneDeal('${slug}',${i})">+ Add</button>
+        </div>
+      `;
+      group.appendChild(row);
+    }
+  }
+
+  area.appendChild(group);
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Accept deals ─────────────────────────────────────────────────────────
+async function acceptOneDeal(slug, idx) {
+  const deal = scrapeResults[slug]?.deals[idx];
+  if (!deal) return;
+  const result = await window.api.appendDeals([deal]);
+  toast(`✓ Added "${deal.title.slice(0,40)}…" (${result.added} added, ${result.skipped} skipped)`);
+  await reloadPanel();
+  renderSidebar();
+}
+
+async function acceptAllChecked() {
+  const toAdd = [];
+  document.querySelectorAll('.result-deal-row').forEach(row => {
+    const cb = row.querySelector('input[type="checkbox"]');
+    if (!cb?.checked) return;
+    const slug = row.dataset.slug;
+    const idx  = parseInt(row.dataset.index, 10);
+    const deal = scrapeResults[slug]?.deals[idx];
+    if (deal) toAdd.push(deal);
+  });
+  if (!toAdd.length) { toast('No deals checked.'); return; }
+  const result = await window.api.appendDeals(toAdd);
+  toast(`✓ ${result.added} deal(s) added, ${result.skipped} duplicate(s) skipped.`);
+  await reloadPanel();
+  renderSidebar();
+}
+
+function clearResults() {
+  scrapeResults = {};
+  document.getElementById('resultArea').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-state-icon">🏨</div>
+      <div class="empty-state-text">No results yet</div>
+      <div class="empty-state-sub">Scrape chains to find new deals</div>
+    </div>
+  `;
+  document.getElementById('mainTitle').textContent = 'Select chains or click "Scrape All"';
+  document.getElementById('btnAcceptAll').style.display = 'none';
+  document.getElementById('btnClearResults').style.display = 'none';
+  renderSidebar();
+}
+
+// ── Right panel (current deals) ───────────────────────────────────────────
+async function reloadPanel() {
+  currentDeals = await window.api.getDeals();
+  document.getElementById('statTotal').textContent  = currentDeals.length;
+  document.getElementById('statChains').textContent = new Set(currentDeals.map(d => d.chainSlug)).size;
+  renderPanel();
+  renderSidebar();
+}
+
+function renderPanel() {
+  const q   = document.getElementById('panelSearch').value.toLowerCase();
+  const filtered = currentDeals.filter(d =>
+    !q || (d.title || '').toLowerCase().includes(q) || (d.chain || '').toLowerCase().includes(q)
+  );
+
+  document.getElementById('panelCount').textContent = filtered.length;
+  const list = document.getElementById('panelList');
+  list.innerHTML = '';
+
+  for (const deal of filtered) {
+    const item = document.createElement('div');
+    item.className = 'panel-deal-item';
+    item.innerHTML = `
+      <div class="panel-deal-title" title="${esc(deal.title)}">${esc(deal.title)}</div>
+      <div class="panel-deal-chain">${esc(deal.chain || '')}${deal.discount ? ' · ' + esc(deal.discount) : ''}</div>
+      <div class="panel-deal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editExistingDeal(${JSON.stringify(esc(deal.title))})">✎ Edit</button>
+        <button class="btn btn-red btn-sm" onclick="deleteExistingDeal(${JSON.stringify(esc(deal.title))})">✕</button>
+      </div>
+    `;
+    list.appendChild(item);
+  }
+}
+
+// ── Edit & delete existing deals ──────────────────────────────────────────
+function editExistingDeal(escapedTitle) {
+  const title = unEsc(escapedTitle);
+  const deal = currentDeals.find(d => d.title === title);
+  if (!deal) return;
+  modalMode = 'edit-existing';
+  modalTitle = title;
+  modalDealRef = deal;
+  openModal('Edit Existing Deal', deal);
+}
+
+async function deleteExistingDeal(escapedTitle) {
+  const title = unEsc(escapedTitle);
+  if (!confirm(`Delete "${title}"?`)) return;
+  await window.api.removeDeal(title);
+  toast('Deal removed.');
+  await reloadPanel();
+}
+
+function editResultDeal(slug, idx) {
+  const deal = scrapeResults[slug]?.deals[idx];
+  if (!deal) return;
+  modalMode  = 'edit-result';
+  modalSlug  = slug;
+  modalDealRef = { deal, idx };
+  openModal('Edit Scraped Deal', deal);
+}
+
+function openModal(title, deal) {
+  document.getElementById('editModalTitle').textContent = title;
+  document.getElementById('ef_title').value       = deal.title || '';
+  document.getElementById('ef_chain').value       = deal.chain || '';
+  document.getElementById('ef_chainSlug').value   = deal.chainSlug || '';
+  document.getElementById('ef_tier').value        = deal.tier || 1;
+  document.getElementById('ef_discount').value    = deal.discount || '';
+  document.getElementById('ef_discountPct').value = deal.discountPct || 0;
+  document.getElementById('ef_validUntil').value  = deal.validUntil || '';
+  document.getElementById('ef_imageUrl').value    = deal.imageUrl || '';
+  document.getElementById('ef_imageAlt').value    = deal.imageAlt || '';
+  document.getElementById('ef_bookingUrl').value  = deal.bookingUrl || '';
+  document.getElementById('ef_location').value    = deal.location || '';
+  document.getElementById('ef_tags').value        = Array.isArray(deal.tags) ? deal.tags.join(', ') : (deal.tags || '');
+  document.getElementById('ef_description').value = deal.description || '';
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('open');
+  modalMode = modalSlug = modalTitle = modalDealRef = null;
+}
+
+async function saveModal() {
+  const tags = document.getElementById('ef_tags').value
+    .split(',').map(t => t.trim()).filter(Boolean);
+
+  const updated = {
+    title:       document.getElementById('ef_title').value.trim(),
+    chain:       document.getElementById('ef_chain').value.trim(),
+    chainSlug:   document.getElementById('ef_chainSlug').value.trim(),
+    tier:        parseInt(document.getElementById('ef_tier').value, 10) || 1,
+    discount:    document.getElementById('ef_discount').value.trim(),
+    discountPct: parseInt(document.getElementById('ef_discountPct').value, 10) || 0,
+    validUntil:  document.getElementById('ef_validUntil').value.trim(),
+    imageUrl:    document.getElementById('ef_imageUrl').value.trim(),
+    imageAlt:    document.getElementById('ef_imageAlt').value.trim(),
+    bookingUrl:  document.getElementById('ef_bookingUrl').value.trim(),
+    location:    document.getElementById('ef_location').value.trim(),
+    tags,
+    description: document.getElementById('ef_description').value.trim(),
+  };
+
+  if (modalMode === 'edit-existing') {
+    await window.api.updateDeal(modalTitle, updated);
+    toast('Deal updated.');
+    await reloadPanel();
+  } else if (modalMode === 'edit-result') {
+    // Patch back into scrapeResults
+    scrapeResults[modalSlug].deals[modalDealRef.idx] = { ...modalDealRef.deal, ...updated };
+    renderResultGroup(modalSlug);
+    toast('Scraped deal edited — click "Add" to save.');
+  }
+  closeModal();
+}
+
+// ── Utility ───────────────────────────────────────────────────────────────
+function openDealsMd() { window.api.openDealsMd(); }
+function showDealsMd()  { window.api.showDealsMd(); }
+
+function log(msg) {
+  document.getElementById('logStrip').textContent = msg;
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function unEsc(s) {
+  return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────
+boot();
+</script>
+</body>
+</html>

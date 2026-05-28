@@ -1,0 +1,7 @@
+node_modules/
+.claude/
+.env
+*.log
+crawl-status.json
+deals.json
+offer-images.json
