@@ -898,9 +898,16 @@ let chainMeta = [];
 const TIER_COLORS = { 1: '#A8802A', 2: '#0D8B80', 3: '#7C5FCA', 4: '#3B78B8' };
 const TIER_LABELS  = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Tier 4' };
 
+// SVG text logos for chains where the Google favicon is too low-res or blurry.
+const LOGO_SVG = {
+  wyndham:    "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 80'><rect width='320' height='80' fill='white'/><text x='160' y='52' font-family='Arial,sans-serif' font-size='34' font-weight='700' fill='%23003087' text-anchor='middle' letter-spacing='1'>WYNDHAM</text></svg>",
+  bestwestern:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 88'><rect width='320' height='88' fill='white'/><text x='160' y='36' font-family='Arial,sans-serif' font-size='21' font-weight='700' fill='%23004B8D' text-anchor='middle'>BEST WESTERN</text><text x='160' y='68' font-family='Arial,sans-serif' font-size='21' font-weight='700' fill='%23CC9900' text-anchor='middle' letter-spacing='3'>REWARDS</text></svg>",
+};
+
 // Google's favicon service — used when a deal has no real photo.
 // Returns each brand's high-quality icon at 256px; no API key, no CORS issues.
 function chainLogoUrl(slug) {
+  if (LOGO_SVG[slug]) return LOGO_SVG[slug];
   const domains = {
     marriott:     'marriott.com',
     hilton:       'hilton.com',
@@ -911,8 +918,6 @@ function chainLogoUrl(slug) {
     aman:         'aman.com',
     kempinski:    'kempinski.com',
     rosewood:     'rosewoodhotels.com',
-    wyndham:      'wyndhamhotels.com',
-    bestwestern:  'bestwestern.com',
     choicehotels: 'choicehotels.com',
     radisson:     'radissonhotels.com',
     melia:        'melia.com',
