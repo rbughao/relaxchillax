@@ -253,6 +253,17 @@
     background: var(--bg2);
   }
   .rec-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rec-img-wrap img.logo-img,
+  .deal-img-wrap img.logo-img {
+    object-fit: contain;
+    padding: 28px 40px;
+    background: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    .rec-img-wrap img.logo-img, .deal-img-wrap img.logo-img { background: #1a2035; }
+  }
+  :root[data-theme="dark"] .rec-img-wrap img.logo-img,
+  :root[data-theme="dark"] .deal-img-wrap img.logo-img { background: #1a2035; }
   .rec-img-gradient {
     position: absolute;
     inset: 0;
@@ -887,6 +898,48 @@ let chainMeta = [];
 const TIER_COLORS = { 1: '#A8802A', 2: '#0D8B80', 3: '#7C5FCA', 4: '#3B78B8' };
 const TIER_LABELS  = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Tier 4' };
 
+// Clearbit logo API — shown when a deal has no photo image
+const CHAIN_LOGOS = {
+  marriott:     'https://logo.clearbit.com/marriott.com',
+  hilton:       'https://logo.clearbit.com/hilton.com',
+  ihg:          'https://logo.clearbit.com/ihg.com',
+  hyatt:        'https://logo.clearbit.com/hyatt.com',
+  accor:        'https://logo.clearbit.com/accor.com',
+  banyantree:   'https://logo.clearbit.com/banyantree.com',
+  aman:         'https://logo.clearbit.com/aman.com',
+  kempinski:    'https://logo.clearbit.com/kempinski.com',
+  rosewood:     'https://logo.clearbit.com/rosewoodhotels.com',
+  wyndham:      'https://logo.clearbit.com/wyndhamhotels.com',
+  bestwestern:  'https://logo.clearbit.com/bestwestern.com',
+  choicehotels: 'https://logo.clearbit.com/choicehotels.com',
+  radisson:     'https://logo.clearbit.com/radissonhotels.com',
+  melia:        'https://logo.clearbit.com/melia.com',
+  millennium:   'https://logo.clearbit.com/millenniumhotels.com',
+  kimpton:      'https://logo.clearbit.com/kimptonhotels.com',
+  autograph:    'https://logo.clearbit.com/marriott.com',
+  curio:        'https://logo.clearbit.com/hilton.com',
+  tribute:      'https://logo.clearbit.com/marriott.com',
+  hardrock:     'https://logo.clearbit.com/hardrock.com',
+  motel6:       'https://logo.clearbit.com/motel6.com',
+  extendedstay: 'https://logo.clearbit.com/extendedstayamerica.com',
+  laquinta:     'https://logo.clearbit.com/laquinta.com',
+  redroof:      'https://logo.clearbit.com/redroof.com',
+  studio6:      'https://logo.clearbit.com/staystudio6.com',
+};
+
+// Called by img onerror — falls back to chain logo, or hides if no logo either
+function imgFail(el, slug) {
+  el.onerror = null;
+  const logo = CHAIN_LOGOS[slug];
+  if (logo && el.src !== logo) {
+    el.src = logo;
+    el.classList.add('logo-img');
+    el.parentElement.classList.add('logo-bg');
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 const CHAINS = [
   { slug: 'marriott',     name: 'Marriott',             tier: 1 },
   { slug: 'hilton',       name: 'Hilton',               tier: 1 },
@@ -1079,7 +1132,7 @@ function renderRecommended() {
     const tc = TIER_COLORS[deal.tier] || '#888';
     card.innerHTML = `
       <div class="rec-img-wrap">
-        ${deal.imageUrl ? `<img src="${escHtml(deal.imageUrl)}" alt="${escHtml(deal.imageAlt || deal.title)}" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('placeholder-${deal.chainSlug}')">` : ''}
+        ${(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug]) ? `<img src="${escHtml(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug])}" alt="${escHtml(deal.imageAlt || deal.chain + ' logo')}" loading="lazy" ${!deal.imageUrl ? 'class="logo-img"' : `onerror="imgFail(this,'${deal.chainSlug}')"`}>` : ''}
         <div class="rec-img-gradient"></div>
         <span class="tier-badge" style="background:${tc}">${TIER_LABELS[deal.tier]}</span>
         <div class="rec-ribbon">Recommended</div>
@@ -1087,7 +1140,6 @@ function renderRecommended() {
           <span class="rec-title">${escHtml(deal.title)}</span>
           <span class="discount-badge">${escHtml(deal.discount)}</span>
         </div>
-        ${!deal.imageUrl ? `<div style="position:absolute;inset:0" class="placeholder-${deal.chainSlug}"></div>` : ''}
       </div>
       <div class="rec-body">
         <p class="rec-desc">${escHtml(deal.description)}</p>
@@ -1098,7 +1150,6 @@ function renderRecommended() {
         </div>
         <a href="${escHtml(deal.bookingUrl)}" target="_blank" rel="noopener" class="book-btn">Book Now →</a>
       </div>`;
-    if (!deal.imageUrl) card.querySelector('.rec-img-wrap').classList.add(`placeholder-${deal.chainSlug}`);
     container.appendChild(card);
   });
 }
@@ -1207,7 +1258,7 @@ function renderGrid(deals) {
     const tags = (deal.tags || []).slice(0, 3);
     card.innerHTML = `
       <div class="deal-img-wrap placeholder-${deal.chainSlug}">
-        ${deal.imageUrl ? `<img src="${escHtml(deal.imageUrl)}" alt="${escHtml(deal.imageAlt || deal.title)}" loading="lazy" onerror="this.onerror=null;this.style.display='none'">` : ''}
+        ${(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug]) ? `<img src="${escHtml(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug])}" alt="${escHtml(deal.imageAlt || deal.chain + ' logo')}" loading="lazy" ${!deal.imageUrl ? 'class="logo-img"' : `onerror="imgFail(this,'${deal.chainSlug}')"`}>` : ''}
         <div class="deal-chain-badge">
           <span class="chain-dot-sm" style="background:${tc}"></span>
           <span>${escHtml(deal.chain)}</span>
