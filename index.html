@@ -898,39 +898,49 @@ let chainMeta = [];
 const TIER_COLORS = { 1: '#A8802A', 2: '#0D8B80', 3: '#7C5FCA', 4: '#3B78B8' };
 const TIER_LABELS  = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Tier 4' };
 
-// Clearbit logo API — shown when a deal has no photo image
-const CHAIN_LOGOS = {
-  marriott:     'https://logo.clearbit.com/marriott.com',
-  hilton:       'https://logo.clearbit.com/hilton.com',
-  ihg:          'https://logo.clearbit.com/ihg.com',
-  hyatt:        'https://logo.clearbit.com/hyatt.com',
-  accor:        'https://logo.clearbit.com/accor.com',
-  banyantree:   'https://logo.clearbit.com/banyantree.com',
-  aman:         'https://logo.clearbit.com/aman.com',
-  kempinski:    'https://logo.clearbit.com/kempinski.com',
-  rosewood:     'https://logo.clearbit.com/rosewoodhotels.com',
-  wyndham:      'https://logo.clearbit.com/wyndhamhotels.com',
-  bestwestern:  'https://logo.clearbit.com/bestwestern.com',
-  choicehotels: 'https://logo.clearbit.com/choicehotels.com',
-  radisson:     'https://logo.clearbit.com/radissonhotels.com',
-  melia:        'https://logo.clearbit.com/melia.com',
-  millennium:   'https://logo.clearbit.com/millenniumhotels.com',
-  kimpton:      'https://logo.clearbit.com/kimptonhotels.com',
-  autograph:    'https://logo.clearbit.com/marriott.com',
-  curio:        'https://logo.clearbit.com/hilton.com',
-  tribute:      'https://logo.clearbit.com/marriott.com',
-  hardrock:     'https://logo.clearbit.com/hardrock.com',
-  motel6:       'https://logo.clearbit.com/motel6.com',
-  extendedstay: 'https://logo.clearbit.com/extendedstayamerica.com',
-  laquinta:     'https://logo.clearbit.com/laquinta.com',
-  redroof:      'https://logo.clearbit.com/redroof.com',
-  studio6:      'https://logo.clearbit.com/staystudio6.com',
-};
+// Google's favicon service — used when a deal has no real photo.
+// Returns each brand's high-quality icon at 256px; no API key, no CORS issues.
+function chainLogoUrl(slug) {
+  const domains = {
+    marriott:     'marriott.com',
+    hilton:       'hilton.com',
+    ihg:          'ihg.com',
+    hyatt:        'hyatt.com',
+    accor:        'accor.com',
+    banyantree:   'banyantree.com',
+    aman:         'aman.com',
+    kempinski:    'kempinski.com',
+    rosewood:     'rosewoodhotels.com',
+    wyndham:      'wyndhamhotels.com',
+    bestwestern:  'bestwestern.com',
+    choicehotels: 'choicehotels.com',
+    radisson:     'radissonhotels.com',
+    melia:        'melia.com',
+    millennium:   'millenniumhotels.com',
+    kimpton:      'kimptonhotels.com',
+    autograph:    'marriott.com',
+    curio:        'hilton.com',
+    tribute:      'marriott.com',
+    hardrock:     'hardrock.com',
+    motel6:       'motel6.com',
+    extendedstay: 'extendedstayamerica.com',
+    laquinta:     'laquinta.com',
+    redroof:      'redroof.com',
+    studio6:      'staystudio6.com',
+  };
+  const d = domains[slug];
+  return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=256` : null;
+}
 
-// Called by img onerror — falls back to chain logo, or hides if no logo either
+// Returns true only for real HTTP(S) photo URLs — not null, empty, or data: URIs
+function hasRealImage(url) {
+  return !!(url && !url.startsWith('data:') && url.startsWith('http'));
+}
+
+// Called by img onerror — swaps failed photo for chain logo, or hides the img
 function imgFail(el, slug) {
   el.onerror = null;
-  const logo = CHAIN_LOGOS[slug];
+  const logo = chainLogoUrl(slug);
   if (logo && el.src !== logo) {
     el.src = logo;
     el.classList.add('logo-img');
@@ -1132,7 +1142,7 @@ function renderRecommended() {
     const tc = TIER_COLORS[deal.tier] || '#888';
     card.innerHTML = `
       <div class="rec-img-wrap">
-        ${(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug]) ? `<img src="${escHtml(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug])}" alt="${escHtml(deal.imageAlt || deal.chain + ' logo')}" loading="lazy" ${!deal.imageUrl ? 'class="logo-img"' : `onerror="imgFail(this,'${deal.chainSlug}')"`}>` : ''}
+        ${(() => { const ri = hasRealImage(deal.imageUrl), lo = chainLogoUrl(deal.chainSlug); const src = ri ? deal.imageUrl : lo; return src ? `<img src="${escHtml(src)}" alt="${escHtml(ri ? (deal.imageAlt || deal.title) : deal.chain + ' logo')}" loading="lazy" ${ri ? `onerror="imgFail(this,'${deal.chainSlug}')"` : 'class="logo-img"'}>` : ''; })()}
         <div class="rec-img-gradient"></div>
         <span class="tier-badge" style="background:${tc}">${TIER_LABELS[deal.tier]}</span>
         <div class="rec-ribbon">Recommended</div>
@@ -1258,7 +1268,7 @@ function renderGrid(deals) {
     const tags = (deal.tags || []).slice(0, 3);
     card.innerHTML = `
       <div class="deal-img-wrap placeholder-${deal.chainSlug}">
-        ${(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug]) ? `<img src="${escHtml(deal.imageUrl || CHAIN_LOGOS[deal.chainSlug])}" alt="${escHtml(deal.imageAlt || deal.chain + ' logo')}" loading="lazy" ${!deal.imageUrl ? 'class="logo-img"' : `onerror="imgFail(this,'${deal.chainSlug}')"`}>` : ''}
+        ${(() => { const ri = hasRealImage(deal.imageUrl), lo = chainLogoUrl(deal.chainSlug); const src = ri ? deal.imageUrl : lo; return src ? `<img src="${escHtml(src)}" alt="${escHtml(ri ? (deal.imageAlt || deal.title) : deal.chain + ' logo')}" loading="lazy" ${ri ? `onerror="imgFail(this,'${deal.chainSlug}')"` : 'class="logo-img"'}>` : ''; })()}
         <div class="deal-chain-badge">
           <span class="chain-dot-sm" style="background:${tc}"></span>
           <span>${escHtml(deal.chain)}</span>

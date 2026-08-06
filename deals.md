@@ -1353,75 +1353,21 @@ Reserve a Rosewood suite and receive thoughtful complimentary additions — from
 
 ---
 
-## Aman — Coastal
+## Aman — Summer Coastal Escapes
 - chain: Aman
 - chainSlug: aman
 - tier: 1
 - discount: Special Offer
 - discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20366%20366'%2F%3E
-- imageAlt: Aman hotel offer
+- validFrom:
+- validUntil: 2026-09-30
+- imageUrl:
+- imageAlt: Aman coastal resort
 - bookingUrl: https://www.aman.com/stories/summer-with-aman
-- location: 
+- location: Worldwide
 - tags: summer
 
-Coastal
-
----
-
-## Aman — amanzoe, greece
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20366%20366'%2F%3E
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/stories/an-amanzoe-exhibition
-- location: 
-- tags: summer
-
-amanzoe, greece
-
----
-
-## Aman — wellness retreats
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20366%20366'%2F%3E
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/stories/global-ambassador-novak-djokovic
-- location: 
-- tags: spa
-
-wellness retreats
-
----
-
-## Aman — Exclusive Hideaways
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20366%20366'%2F%3E
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/villas
-- location: 
-- tags: family
-
-Exclusive Hideaways
+Discover Aman's curated collection of coastal retreats this summer — from cliff-top sanctuaries in Greece to beachfront casitas in Mexico. Each property offers Aman's signature stillness and personalised service in breathtaking natural settings.
 
 ---
 
@@ -1440,3 +1386,363 @@ Exclusive Hideaways
 - tags: member, advance, weekend, spa
 
 Save up to 25% at Kempinski. Visit the website for full details.
+
+---
+
+## Marriott — Featured Hotel Offers
+- chain: Marriott
+- chainSlug: marriott
+- tier: 1
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: https://cache.marriott.com/is/image/marriotts7prod/pdt-Denver-Le-Meridien-1-802349955958606:Square?wid=800&fit=constrain
+- imageAlt: Marriott hotel offer
+- bookingUrl: https://www.marriott.com/offers/findOffers.mi?offers=OFF-97645,1355589,OFF-141959,1355738,1355935,OFF-83705
+- location: 
+- tags: member, suite
+
+Multiple LocationsPremium Rooms & Suites Await
+
+---
+
+## Marriott — Exceptional Stays, Exclusive Savings
+- chain: Marriott
+- chainSlug: marriott
+- tier: 1
+- discount: Up to 15% Off
+- discountPct: 15
+- validFrom: 
+- validUntil: 
+- imageUrl: https://cache.marriott.com/content/dam/marriott-renditions/OOLGS/oolgs-discovery-beachwalk-6991-sq.jpg?downsize=800px:*
+- imageAlt: Marriott hotel offer
+- bookingUrl: https://www.marriott.com/offers/findOffers.mi?offers=OFF-214314,OFF-234875,OFF-215290,OFF-136792,OFF-214985,OFF-235507,OFF-216704,OFF-220601,OFF-220599,OFF-223525,OFF-167028,OFF-220992,OFF-224376,OFF-214302,OFF-214088
+- location: 
+- tags: member, spa, family
+
+Multiple LocationsSave 10% on Stays & Dining
+
+---
+
+## Marriott — Recently Viewed Offers
+- chain: Marriott
+- chainSlug: marriott
+- tier: 1
+- discount: Up to 20% Off
+- discountPct: 20
+- validFrom: 
+- validUntil: 
+- imageUrl: https://cache.marriott.com/is/image/marriotts7prod/bonvoy-explore-ancient-architect-31212:Wide-Hor?wid=800&fit=constrain
+- imageAlt: Marriott hotel offer
+- bookingUrl: https://www.marriott.com/offers/findOffers.mi?offers=OFF-20644,OFF-20337
+- location: 
+- tags: 
+
+Multiple LocationsEnjoy 50% Off Your Second Room
+
+---
+
+## Marriott — How Marriott Hotel Offers Work
+- chain: Marriott
+- chainSlug: marriott
+- tier: 1
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Marriott hotel offer
+- bookingUrl: https://www.marriott.com/loyalty/createAccount/createAccountPage1.mi
+- location: 
+- tags: member, family, extended stay
+
+How Marriott Hotel Offers Work
+
+---
+
+## Hilton — Special Offer
+- chain: Hilton
+- chainSlug: hilton
+- tier: 1
+- discount: Up to 17% Off
+- discountPct: 17
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Hilton hotel offer
+- bookingUrl: https://www.hilton.com/en/offers/
+- location: 
+- tags: member, advance
+
+rs 0 filters selected Honors Discount Advance Purchase Save up to 17% off our Best Available Rate* by booking in advance. It pays to plan ahead! DiscountHonors Member View Details
+
+---
+
+## Accor — Special Offer
+- chain: Accor
+- chainSlug: accor
+- tier: 1
+- discount: Up to 50% Off
+- discountPct: 50
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Accor hotel offer
+- bookingUrl: https://all.accor.com/a/en.html
+- location: 
+- tags: member
+
+s Search Our Offers SEE MORE OFFERS The MGallery Explorers: up to 50% Reward points Visit Singapore for your next getaway Member Exclusive Live Longevity Everyday More than hotels.
+
+---
+
+## Aman — Amanvari Mexico, Now Open
+- chain: Aman
+- chainSlug: aman
+- tier: 1
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 2026-08-01
+- validUntil: 2026-12-31
+- imageUrl: https://www.aman.com/sites/default/files/styles/carousel_cards_slim_plus/public/2026-05/Amanvari--Mexico---Accommodation--Beachfront-Casita--1-copy_3.jpg?itok=4TukqOxT
+- imageAlt: Amanvari beachfront casita, Baja California
+- bookingUrl: https://www.aman.com/resorts/amanvari
+- location: Baja California, Mexico
+- tags: suite, spa
+
+Aman's newest resort opens on Baja's East Cape, where desert mountains meet the Sea of Cortez. Amanvari offers beachfront casitas, elevated suites, and the signature Aman Spa amid one of Mexico's most untouched coastal landscapes.
+
+---
+
+## Banyan Tree — Special Offer
+- chain: Banyan Tree
+- chainSlug: banyantree
+- tier: 1
+- discount: Up to 35% Off
+- discountPct: 35
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Banyan Tree hotel offer
+- bookingUrl: https://www.banyantree.com/offers
+- location: 
+- tags: 
+
+warded for it. Stay for a minimum of three nights and enjoy up to 35% off our best available rate with our Stay More, Pay Less offer. The world looks different when you stop counti
+
+---
+
+## Kempinski — Special Offer
+- chain: Kempinski
+- chainSlug: kempinski
+- tier: 1
+- discount: Up to 25% Off
+- discountPct: 25
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Kempinski hotel offer
+- bookingUrl: https://www.kempinski.com/en/offers
+- location: 
+- tags: member, family, summer
+
+r Family Escape Experience a family escape to remember with up to 25% savings on unhurried summer stays in remarkable destinations. Enjoy experiences crafted for all ages and the t
+
+---
+
+## Wyndham — Auto Club Member Discounts
+- chain: Wyndham
+- chainSlug: wyndham
+- tier: 2
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Wyndham hotel offer
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/terms-autoclub-evergreen.display.html
+- location: 
+- tags: member
+
+Auto Club Member Discounts
+
+---
+
+## Wyndham — Group Discount
+- chain: Wyndham
+- chainSlug: wyndham
+- tier: 2
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Wyndham hotel offer
+- bookingUrl: https://groups.wyndhamhotels.com/
+- location: 
+- tags: 
+
+Group Discount
+
+---
+
+## Wyndham — Government Rates
+- chain: Wyndham
+- chainSlug: wyndham
+- tier: 2
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Wyndham hotel offer
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/terms-GOVERNMENT-FINAL.display.html
+- location: 
+- tags: 
+
+Government Rates
+
+---
+
+## Wyndham — Seniors Save
+- chain: Wyndham
+- chainSlug: wyndham
+- tier: 2
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Wyndham hotel offer
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/terms-senior-evergreen.display.html
+- location: 
+- tags: 
+
+Seniors Save
+
+---
+
+## Wyndham — Earn Unlimited Points with the Wyndham Rewards® Debit Card
+- chain: Wyndham
+- chainSlug: wyndham
+- tier: 2
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: https://www.wyndhamhotels.com/content/dam/textoffericons/whg/whg_icon_credit_cards.svg
+- imageAlt: Wyndham hotel offer
+- bookingUrl: https://wyndhamrewardsdebit.com/pdf/EarningTerms.pdf
+- location: 
+- tags: member
+
+Earn Unlimited Points with the Wyndham Rewards® Debit Card
+
+---
+
+## Wyndham — Members Always Get the Lowest Price
+- chain: Wyndham
+- chainSlug: wyndham
+- tier: 2
+- discount: Special Offer
+- discountPct: 0
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Wyndham hotel offer
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/book-direct-wr-lowest-available-price.display.html
+- location: 
+- tags: member
+
+Members Always Get the Lowest Price
+
+---
+
+## Hard Rock Hotels — Special Offer
+- chain: Hard Rock Hotels
+- chainSlug: hardrock
+- tier: 3
+- discount: Up to 10% Off
+- discountPct: 10
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Hard Rock Hotels hotel offer
+- bookingUrl: https://hotel.hardrock.com/offers.aspx
+- location: 
+- tags: member
+
+e'll match it and reward you with a complimentary upgrade + 10% off. BOOK NOW LEARN MORE No offers found. Please make a different selection. STAY CONNECTED Join our email list to r
+
+---
+
+## Choice Hotels — Special Offer
+- chain: Choice Hotels
+- chainSlug: choicehotels
+- tier: 2
+- discount: Up to 15% Off
+- discountPct: 15
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Choice Hotels hotel offer
+- bookingUrl: https://www.choicehotels.com/deals
+- location: 
+- tags: summer
+
+ds Sign in or join SUMMER HOLIDAY SAVINGS Elevate Your Stay Save 15% on 2+ nights* when you book and stay 8/5–9/1. *Terms apply. Book now Search Hotels Destination Thursday, August
+
+---
+
+## Choice Hotels — Special Offer
+- chain: Choice Hotels
+- chainSlug: choicehotels
+- tier: 2
+- discount: Up to 45% Off
+- discountPct: 45
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Choice Hotels hotel offer
+- bookingUrl: https://www.choicehotels.com/deals
+- location: 
+- tags: member
+
+ays you’ll never forget. Explore hotels Limited-Time offer: Up to 45% off* points! Need a few more points to get to your next reward? Good news: take 45% off your purchase of Choic
+
+---
+
+## Choice Hotels — Special Offer
+- chain: Choice Hotels
+- chainSlug: choicehotels
+- tier: 2
+- discount: Up to 35% Off
+- discountPct: 35
+- validFrom: 
+- validUntil: 2026-09-14
+- imageUrl: 
+- imageAlt: Choice Hotels hotel offer
+- bookingUrl: https://www.choicehotels.com/deals
+- location: 
+- tags: 
+
+Budget® Rent a car with Avis or Budget for 4+ days and get up to 35% off*, plus, earn 3,000 Choice Privileges® points. Book by September 15, 2026. *Terms apply. Learn more 2 milli
+
+---
+
+## Studio 6 — Special Offer
+- chain: Studio 6
+- chainSlug: studio6
+- tier: 4
+- discount: Up to 10% Off
+- discountPct: 10
+- validFrom: 
+- validUntil: 
+- imageUrl: 
+- imageAlt: Studio 6 hotel offer
+- bookingUrl: https://www.studio6.com/
+- location: 
+- tags: member, extended stay
+
+tel stays? Active and retired personnel may be eligible for up to 10% military discounts. For AARP members, we offer a 10% discount on the best available rate for extended stays an
