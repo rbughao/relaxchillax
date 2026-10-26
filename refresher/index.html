@@ -312,6 +312,20 @@
     color: var(--muted);
   }
   .deal-tag.gold { background: rgba(201,151,59,0.15); color: var(--gold); }
+  .deal-tag.link-ok    { background: rgba(34,197,94,0.15);  color: var(--green); }
+  .deal-tag.link-info  { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .deal-tag.link-warn  { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .deal-tag.link-muted { background: var(--surface2);       color: var(--muted); }
+  .result-deal-link {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--blue);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .result-deal-link-was { font-size: 10px; color: var(--muted); text-decoration: line-through; }
 
   .result-deal-actions {
     display: flex;
@@ -805,8 +819,11 @@ function renderResultGroup(slug) {
         <input type="checkbox" checked>
         <div class="result-deal-info">
           <div class="result-deal-title" title="${esc(deal.title)}">${esc(deal.title)}</div>
-          <div class="result-deal-meta">${disc}${exp}${tags}</div>
+          <div class="result-deal-meta">${linkPill(deal)}${disc}${exp}${tags}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:4px;">${esc((deal.description || '').slice(0,120))}…</div>
+          <a class="result-deal-link" href="#" onclick="window.api.openUrl(this.title);return false;"
+             title="${esc(deal.bookingUrl)}">${esc(shortUrl(deal.bookingUrl))}</a>
+          ${deal.linkOriginal ? `<div class="result-deal-link-was">was: ${esc(shortUrl(deal.linkOriginal))}</div>` : ''}
         </div>
         <div class="result-deal-actions">
           <button class="btn btn-ghost btn-sm" onclick="editResultDeal('${slug}',${i})">✎</button>
@@ -822,6 +839,24 @@ function renderResultGroup(slug) {
 
 function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Result of the scraper's link check (browserScraper.js verifyLink)
+const LINK_PILLS = {
+  verified:  ['link-ok',    '✓ Offer page'],
+  loads:     ['link-info',  '◐ Page loads — title too generic to confirm'],
+  listing:   ['link-info',  '≡ Offers listing'],
+  replaced:  ['link-warn',  '⚠ Link replaced with offers listing'],
+  unchecked: ['link-muted', '? Link not checked'],
+  manual:    ['link-info',  '✎ Link edited'],
+};
+function linkPill(deal) {
+  const [cls, label] = LINK_PILLS[deal.linkStatus] || LINK_PILLS.unchecked;
+  return `<span class="deal-tag ${cls}" title="${esc(deal.linkNote || '')}">${label}${deal.linkNote ? ' — ' + esc(deal.linkNote) : ''}</span>`;
+}
+function shortUrl(u) {
+  try { const x = new URL(u); return x.host.replace(/^www\./, '') + x.pathname + (x.search ? '?…' : ''); }
+  catch { return u || ''; }
 }
 
 // ── Accept deals ─────────────────────────────────────────────────────────
@@ -976,8 +1011,12 @@ async function saveModal() {
     toast('Deal updated.');
     await reloadPanel();
   } else if (modalMode === 'edit-result') {
-    // Patch back into scrapeResults
-    scrapeResults[modalSlug].deals[modalDealRef.idx] = { ...modalDealRef.deal, ...updated };
+    // Patch back into scrapeResults; a hand-edited link supersedes the check
+    const linkEdited = updated.bookingUrl !== modalDealRef.deal.bookingUrl;
+    scrapeResults[modalSlug].deals[modalDealRef.idx] = {
+      ...modalDealRef.deal, ...updated,
+      ...(linkEdited ? { linkStatus: 'manual', linkNote: '' } : {}),
+    };
     renderResultGroup(modalSlug);
     toast('Scraped deal edited — click "Add" to save.');
   }

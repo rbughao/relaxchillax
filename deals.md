@@ -1425,42 +1425,6 @@ Multiple LocationsSave 10% on Stays & Dining
 
 ---
 
-## Marriott — Recently Viewed Offers
-- chain: Marriott
-- chainSlug: marriott
-- tier: 1
-- discount: Up to 20% Off
-- discountPct: 20
-- validFrom: 
-- validUntil: 
-- imageUrl: https://cache.marriott.com/is/image/marriotts7prod/bonvoy-explore-ancient-architect-31212:Wide-Hor?wid=800&fit=constrain
-- imageAlt: Marriott hotel offer
-- bookingUrl: https://www.marriott.com/offers/findOffers.mi?offers=OFF-20644,OFF-20337
-- location: 
-- tags: 
-
-Multiple LocationsEnjoy 50% Off Your Second Room
-
----
-
-## Marriott — How Marriott Hotel Offers Work
-- chain: Marriott
-- chainSlug: marriott
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: 
-- imageAlt: Marriott hotel offer
-- bookingUrl: https://www.marriott.com/loyalty/createAccount/createAccountPage1.mi
-- location: 
-- tags: member, family, extended stay
-
-How Marriott Hotel Offers Work
-
----
-
 ## Hilton — Special Offer
 - chain: Hilton
 - chainSlug: hilton
@@ -1561,7 +1525,7 @@ r Family Escape Experience a family escape to remember with up to 25% savings on
 - validUntil: 
 - imageUrl: 
 - imageAlt: Wyndham hotel offer
-- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/terms-autoclub-evergreen.display.html
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals
 - location: 
 - tags: member
 
@@ -1597,7 +1561,7 @@ Group Discount
 - validUntil: 
 - imageUrl: 
 - imageAlt: Wyndham hotel offer
-- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/terms-GOVERNMENT-FINAL.display.html
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals
 - location: 
 - tags: 
 
@@ -1615,7 +1579,7 @@ Government Rates
 - validUntil: 
 - imageUrl: 
 - imageAlt: Wyndham hotel offer
-- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/terms-senior-evergreen.display.html
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals
 - location: 
 - tags: 
 
@@ -1633,7 +1597,7 @@ Seniors Save
 - validUntil: 
 - imageUrl: https://www.wyndhamhotels.com/content/dam/textoffericons/whg/whg_icon_credit_cards.svg
 - imageAlt: Wyndham hotel offer
-- bookingUrl: https://wyndhamrewardsdebit.com/pdf/EarningTerms.pdf
+- bookingUrl: https://wyndhamrewardsdebit.com/
 - location: 
 - tags: member
 
@@ -1651,7 +1615,7 @@ Earn Unlimited Points with the Wyndham Rewards® Debit Card
 - validUntil: 
 - imageUrl: 
 - imageAlt: Wyndham hotel offer
-- bookingUrl: https://www.wyndhamhotels.com/hotel-deals?lightbox=/content/whg-ecomm-responsive/en-us/whg/legal/book-direct-wr-lowest-available-price.display.html
+- bookingUrl: https://www.wyndhamhotels.com/hotel-deals
 - location: 
 - tags: member
 
@@ -1746,111 +1710,3 @@ Budget® Rent a car with Avis or Budget for 4+ days and get up to 35% off*, plus
 - tags: member, extended stay
 
 tel stays? Active and retired personnel may be eligible for up to 10% military discounts. For AARP members, we offer a 10% discount on the best available rate for extended stays an
-
----
-
-## Amanvari, Mexico
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: https://www.aman.com/sites/default/files/styles/carousel_cards_slim_plus/public/2026-05/Amanvari--Mexico---Accommodation--Beachfront-Casita--1-copy_3.jpg?itok=4TukqOxT
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/resorts/amanvari
-- location: 
-- tags: 
-
-Set amid wild nature, Amanvari emerges where the distinct desert, mountain and ocean landscapes of Baja's East Cape converge.Amanvari will welcome guests from 1 August 2026.
-
----
-
-## Aman — HOTELS & RESORTS
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: https://www.aman.com/sites/default/files/styles/carousel_cards_extra_large_2x/public/2025-11/Amangiri%2C%20USA%20-%20Accommodation%2C%20Desert%20Pool%20Suite.webp?itok=2EoiAFdf
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/destinations
-- location: 
-- tags: suite
-
-HOTELS & RESORTS
-
----
-
-## Aman — Now open
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: https://www.aman.com/sites/default/files/styles/listing_teaser_slim_extra_large_2x/public/2026-07/Amanvari--Mexico---Accommodation--Elevated-Casita--15.webp?itok=j5XhXZ7B
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/resorts/amanvari
-- location: 
-- tags: 
-
-Now open
-
----
-
-## Aman — amanzoe, greece
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: https://www.aman.com/sites/default/files/styles/listing_teaser_extra_large_2x/public/2026-07/Amanzoe--Greece---Art-Exhibit--Alexandra-Athanassiades---11-.webp?itok=Q8syDKgn
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/stories/an-amanzoe-exhibition
-- location: 
-- tags: 
-
-amanzoe, greece
-
----
-
-## Aman — wellness retreats
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: https://www.aman.com/sites/default/files/styles/listing_teaser_extra_large_2x/public/2026-05/Brand-Ambassador_-Novak-Djokovic---Aman-New-York--United-States--1-.webp?itok=BLM2k4h4
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/stories/global-ambassador-novak-djokovic
-- location: 
-- tags: 
-
-wellness retreats
-
----
-
-## Aman — Exclusive Hideaways
-- chain: Aman
-- chainSlug: aman
-- tier: 1
-- discount: Special Offer
-- discountPct: 0
-- validFrom: 
-- validUntil: 
-- imageUrl: https://www.aman.com/sites/default/files/styles/listing_teaser_extra_large_2x/public/2024-10/amanzoe-accommodation-villa-21-4299_2.webp?itok=ZOTJQQ3M
-- imageAlt: Aman hotel offer
-- bookingUrl: https://www.aman.com/villas
-- location: 
-- tags: 
-
-Exclusive Hideaways

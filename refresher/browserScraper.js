@@ -27,12 +27,15 @@ const RENDER_MS      = 4500;   // wait after did-finish-load for SPA render
 const WARMUP_MS      = 2800;   // wait on homepage before navigating to deals
 const NAV_TIMEOUT    = 45000;  // per-page timeout
 const WARMUP_TIMEOUT = 25000;  // homepage timeout (less strict)
-const DETAIL_TIMEOUT = 20000;  // offer detail page, visited only to find an image
-const MAX_DETAIL_VISITS = 6;   // per chain — keeps a full scrape reasonably quick
+const DETAIL_TIMEOUT = 20000;  // offer page, visited to verify the link + find an image
+const MAX_DETAIL_VISITS = 8;   // per chain — keeps a full scrape reasonably quick
 const MIN_PHOTO_PX   = 320;    // narrower images are thumbnails, not card photos
 
 // URLs that are icons/logos rather than photos (path segment or file name match)
 const NOT_PHOTO_RE = /\.svg(\?|#|$)|(^|[\/_.-])(logo|icon|sprite|placeholder|spacer|blank)s?([\/_.-]|$)/i;
+
+// Links that are never the offer itself: T&C popups and PDFs, account pages, etc.
+const BAD_LINK_RE = /terms|conditions|legal|privacy|lightbox=|\.pdf(\?|#|$)|log-?in|sign-?in|sign-?up|register|create-?account|enrol|\/join(\.html?|\/|$)|careers|faq|contact-us/i;
 
 const CHROME_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
@@ -244,6 +247,31 @@ const EXTRACT_SCRIPT = [
   '    });',
   '    return best.u&&(best.w===0||best.w>=MIN_W) ? res(best.u) : "";',
   '  }',
+  // Link picking: score every link in the card rather than taking the first
+  // (often a T&Cs popup or a sign-up link). The title link and "Book / View
+  // offer" buttons win; links back to this listing page lose. "" = no
+  // usable link — the Node side then falls back to the chain's offers page.
+  '  var BAD_LINK=' + BAD_LINK_RE + ';',
+  '  function bare(u){ return u.split("#")[0].replace(/\\/$/,""); }',
+  '  function link(el,te){',
+  '    var as=Array.from(el.querySelectorAll("a[href],[data-href]")), up=el.closest("a[href]");',
+  '    if(up) as.push(up);',
+  '    var title=gt(te).toLowerCase(), best="", bs=-1;',
+  '    as.forEach(function(a){',
+  '      var h=a.getAttribute("href")||a.getAttribute("data-href")||"", u;',
+  '      if(!h||/^(#|javascript:|mailto:|tel:)/i.test(h)) return;',
+  '      try{ u=new URL(h,location.href); }catch(e){ return; }',
+  '      if(BAD_LINK.test(u.pathname+u.search)) return;',
+  '      var t=gt(a).toLowerCase(), s=0;',
+  '      if(te&&(a.contains(te)||te.contains(a))) s+=4;',
+  '      else if(title&&t.indexOf(title.slice(0,24))>=0) s+=3;',
+  '      if(/\\b(book|view|see|explore|discover|details|learn more|more info|find out|reserve|claim|get (the )?offer)\\b/.test(t)) s+=3;',
+  '      if(/offer|deal|package|promo|special|sale|discount|save|escape|getaway/i.test(u.pathname)) s+=2;',
+  '      if(bare(u.href)===bare(location.href)) s-=5;',
+  '      if(s>bs){ bs=s; best=u.href; }',
+  '    });',
+  '    return best;',
+  '  }',
   '  var SELS=[',
   '    "[class*=\\"offer-card\\"]","[class*=\\"offerCard\\"]","[class*=\\"offer_card\\"]",',
   '    "[class*=\\"deal-card\\"]","[class*=\\"dealCard\\"]",',
@@ -273,11 +301,10 @@ const EXTRACT_SCRIPT = [
   '      if(seen[key]) continue; seen[key]=1;',
   '      var de=el.querySelector("p,[class*=desc],[class*=body],[class*=copy],[class*=text],[class*=sub]");',
   '      var desc=gt(de)||text;',
-  '      var le=el.querySelector("a[href]")||el.closest("a[href]");',
   '      var pct=disc(text);',
   '      deals.push({title:title,description:desc.slice(0,280),discountPct:pct,',
   '        discount:pct?"Up to "+pct+"% Off":"Special Offer",',
-  '        imageUrl:img(el),bookingUrl:res(le?le.getAttribute("href"):""),rawText:text.slice(0,300)});',
+  '        imageUrl:img(el),bookingUrl:link(el,te),rawText:text.slice(0,300)});',
   '      if(deals.length>=6) break;',
   '    }',
   '  }',
@@ -297,7 +324,7 @@ const EXTRACT_SCRIPT = [
   '            if(!t||seen[t.toLowerCase()]) continue;',
   '            seen[t.toLowerCase()]=1;',
   '            deals.push({title:t,description:o.description||t,discountPct:0,discount:"Special Offer",',
-  '              imageUrl:o.image||"",bookingUrl:o.url||location.href,rawText:""});',
+  '              imageUrl:o.image||"",bookingUrl:o.url?res(o.url):"",rawText:""});',
   '          }',
   '        }',
   '      }catch(e){}',
@@ -313,7 +340,7 @@ const EXTRACT_SCRIPT = [
   '        used[pct]=1;',
   '        var sent=bt.slice(Math.max(0,m.index-60),m.index+120).trim();',
   '        deals.push({title:"Special Offer",description:sent.slice(0,280),discountPct:pct,',
-  '          discount:"Up to "+pct+"% Off",imageUrl:"",bookingUrl:location.href,rawText:sent});',
+  '          discount:"Up to "+pct+"% Off",imageUrl:"",bookingUrl:"",rawText:sent});',
   '      }',
   '    }',
   '  }',
@@ -332,43 +359,10 @@ const OG_IMAGE_SCRIPT = [
 
 const isPhotoUrl = u => !!u && /^https?:\/\//.test(u) && !NOT_PHOTO_RE.test(u);
 
-// Visit each image-less offer's own page and take its og:image, falling back
-// to the listing page's og:image so every scraped deal arrives with a photo.
-async function fillMissingImages(win, chain, deals) {
-  let listingImg = '';
-  try { listingImg = await win.webContents.executeJavaScript(OG_IMAGE_SCRIPT); } catch {}
-  if (!isPhotoUrl(listingImg)) listingImg = '';
-
-  const missing = deals.filter(d => !d.imageUrl);
-  let visits = 0;
-  for (const d of missing) {
-    const url = d.bookingUrl;
-    if (visits < MAX_DETAIL_VISITS && url && url !== chain.url && /^https?:\/\//.test(url)) {
-      visits++;
-      win.loadURL(url);
-      if (await waitForLoad(win, DETAIL_TIMEOUT) === 'loaded') {
-        await sleep(jitter(1500));
-        try {
-          const og = await win.webContents.executeJavaScript(OG_IMAGE_SCRIPT);
-          if (isPhotoUrl(og)) { d.imageUrl = og; continue; }
-        } catch {}
-      }
-    }
-    d.imageUrl = listingImg;
-  }
-}
-
-// ── Single chain scraper ───────────────────────────────────────────────────
-async function scrapeChain(chain) {
-  const out = {
-    slug: chain.slug, name: chain.name, tier: chain.tier,
-    status: 'pending', deals: [], error: null, url: chain.url,
-  };
-
-  let httpStatus = 200;
-
-  // persist: session stores cookies/localStorage to disk between app runs —
-  // on the second scrape the site sees a returning visitor with cookies.
+// ── Browser window per chain ───────────────────────────────────────────────
+// persist: session stores cookies/localStorage to disk between app runs —
+// on the second scrape the site sees a returning visitor with cookies.
+function openChainWindow(chain) {
   const win = new BrowserWindow({
     show: false,
     width: 1366,
@@ -380,43 +374,167 @@ async function scrapeChain(chain) {
       partition:        'persist:scraper-' + chain.slug,
     },
   });
-
   win.webContents.setUserAgent(CHROME_UA);
+
+  let httpStatus = 0;
   win.webContents.on('did-navigate', (e, url, code) => { if (code) httpStatus = code; });
+
+  // Load a URL → { res: 'loaded'|'failed'|'timeout', status, url (after redirects) }
+  win.go = async (url, timeout) => {
+    httpStatus = 0;
+    win.loadURL(url).catch(() => {});  // failures are reported by waitForLoad
+    const res = await waitForLoad(win, timeout);
+    return { res, status: httpStatus, url: win.webContents.getURL() };
+  };
+  return win;
+}
+
+// Homepage warm-up for bot-protected sites
+async function warmUp(win, chain) {
+  const warmupUrl = WARMUP_PAGES[chain.slug];
+  if (!warmupUrl) return;
+  const w = await win.go(warmupUrl, WARMUP_TIMEOUT);
+  if (w.res === 'loaded' && w.status < 400) {
+    await sleep(jitter(WARMUP_MS));   // let the homepage run its bot-detection JS
+    await simulateHuman(win);         // read the homepage like a person
+    await sleep(jitter(1000));        // pause before "clicking" elsewhere
+  }
+}
+
+// ── Offer link verification ────────────────────────────────────────────────
+// Generic words that don't identify a particular offer
+const LINK_STOPWORDS = new Set((
+  'the and for with your our from this that into offer offers deal deals special ' +
+  'save saving savings stay stays hotel hotels resort resorts book booking night ' +
+  'nights more member members rate rates exclusive package packages'
+).split(' '));
+
+// Distinctive words of an offer title, used to confirm a page is about it
+function titleKeywords(title, chainName) {
+  const chainWords = new Set(chainName.toLowerCase().split(/[^a-z0-9]+/));
+  return [...new Set(title.toLowerCase().split(/[^a-z0-9]+/)
+    .filter(w => w.length >= 4 && !LINK_STOPWORDS.has(w) && !chainWords.has(w)))];
+}
+
+const pageCheckScript = keywords => [
+  '(function(){',
+  '  var head=(document.title+" "+Array.from(document.querySelectorAll("h1,h2")).slice(0,8)',
+  '    .map(function(h){ return h.textContent; }).join(" ")).toLowerCase();',
+  '  var body=(document.body?document.body.innerText:"").toLowerCase();',
+  '  var kw=' + JSON.stringify(keywords) + ';',
+  '  return {',
+  '    notFound: /not found|\\b404\\b|page (cannot|can.t) be found|no longer available|has expired|offer (has )?ended/.test(head),',
+  '    hits: kw.filter(function(k){ return body.indexOf(k)>=0; }).length',
+  '  };',
+  '})();',
+].join('\n');
+
+// host + path, lower-cased, without trailing slash — for "same page" checks
+function bareUrl(u) {
+  try { const x = new URL(u); return (x.host.replace(/^www\./, '') + x.pathname).replace(/\/$/, '').toLowerCase(); }
+  catch { return String(u); }
+}
+
+// True when u is the chain's own homepage: same host as the chain's offers
+// page and a path of only locale/index segments (/, /en/, /a/en.html).
+// Other subdomains' roots (e.g. groups.wyndhamhotels.com) are real destinations.
+function isHomePage(u, chain) {
+  try {
+    const x = new URL(u), host = h => h.replace(/^www\./, '');
+    if (chain && chain.url && host(x.host) !== host(new URL(chain.url).host)) return false;
+    return x.pathname.split('/').filter(Boolean)
+      .every(s => /^([a-z]{1,2}([-_][a-z]{2})?|home|index)(\.\w+)?$/i.test(s));
+  } catch { return false; }
+}
+
+// Decide whether an offer link really leads to that offer.
+//   verified   page loads and mentions the offer's title words
+//   loads      page loads but the title is too generic to confirm it
+//   listing    link is the chain's offers listing itself
+//   replaced   broken / not an offer page — caller swaps in the listing URL
+//   unchecked  couldn't tell (blocked, timed out, visit limit) — link kept
+// Returns { status, note, visited, ogImage }.
+async function verifyLink(win, url, title, chain, listingUrl, canVisit) {
+  const same = u => bareUrl(u) === bareUrl(chain.url) || (!!listingUrl && bareUrl(u) === bareUrl(listingUrl));
+  if (!url) return { status: 'replaced', note: 'offer card has no link' };
+  if (!/^https?:\/\//.test(url)) return { status: 'replaced', note: 'not a web link' };
+  if (BAD_LINK_RE.test(url)) return { status: 'replaced', note: 'link is a T&Cs / account page, not the offer' };
+  if (same(url)) return { status: 'listing', note: 'offer has no page of its own' };
+  if (isHomePage(url, chain)) return { status: 'replaced', note: 'link is the homepage' };
+  if (!canVisit) return { status: 'unchecked', note: 'visit limit reached' };
+
+  const nav = await win.go(url, DETAIL_TIMEOUT);
+  const fail = note => ({ status: 'replaced', note, visited: true });
+  if (nav.res === 'timeout') return { status: 'unchecked', note: 'page timed out', visited: true };
+  if (nav.res === 'failed')  return fail('link failed to load');
+  if (nav.status === 403 || nav.status === 429)
+    return { status: 'unchecked', note: `site blocked the check (HTTP ${nav.status})`, visited: true };
+  if (nav.status >= 400)     return fail(`link returns HTTP ${nav.status}`);
+  if (same(nav.url))         return { status: 'listing', note: 'link redirects to the offers listing', visited: true };
+  if (isHomePage(nav.url, chain)) return fail('link redirects to the homepage');
+  if (BAD_LINK_RE.test(nav.url)) return fail('link redirects to a sign-in / T&Cs page');
+
+  await sleep(jitter(1500));  // let SPA content render
+  const kw = titleKeywords(title, chain.name);
+  let page = { notFound: false, hits: 0 }, og = '';
+  try { page = await win.webContents.executeJavaScript(pageCheckScript(kw)); } catch {}
+  if (page.notFound) return fail('page says not found / expired');
+  if (kw.length && page.hits < Math.ceil(kw.length / 2))
+    return fail(`page doesn't mention the offer ("${kw.join(' ')}")`);
+  try { og = await win.webContents.executeJavaScript(OG_IMAGE_SCRIPT); } catch {}
+  return { status: kw.length ? 'verified' : 'loads', note: '', visited: true, ogImage: isPhotoUrl(og) ? og : '' };
+}
+
+// Verify each scraped offer's link — bad ones are swapped for the chain's
+// offers page — and fill missing photos from the offer page's og:image,
+// falling back to the listing page's og:image.
+async function checkOffers(win, chain, deals) {
+  const listingUrl = win.webContents.getURL();
+  let listingImg = '';
+  try { listingImg = await win.webContents.executeJavaScript(OG_IMAGE_SCRIPT); } catch {}
+  if (!isPhotoUrl(listingImg)) listingImg = '';
+
+  let visits = 0;
+  for (const d of deals) {
+    const check = await verifyLink(win, d.bookingUrl, d.title, chain, listingUrl, visits < MAX_DETAIL_VISITS);
+    if (check.visited) visits++;
+    d.linkStatus = check.status;
+    d.linkNote   = check.note;
+    if (check.status === 'replaced') {
+      d.linkOriginal = d.bookingUrl;
+      d.bookingUrl   = chain.url;
+    }
+    if (!d.imageUrl) d.imageUrl = check.ogImage || listingImg;
+  }
+}
+
+// ── Single chain scraper ───────────────────────────────────────────────────
+async function scrapeChain(chain) {
+  const out = {
+    slug: chain.slug, name: chain.name, tier: chain.tier,
+    status: 'pending', deals: [], error: null, url: chain.url,
+  };
+
+  const win = openChainWindow(chain);
 
   try {
     // ── Step 1: Homepage warm-up for bot-protected sites ─────────────────
-    const warmupUrl = WARMUP_PAGES[chain.slug];
-    if (warmupUrl) {
-      win.loadURL(warmupUrl);
-      const wRes = await waitForLoad(win, WARMUP_TIMEOUT);
-
-      if (wRes === 'loaded' && httpStatus < 400) {
-        // Let the homepage fully render its bot-detection JS
-        await sleep(jitter(WARMUP_MS));
-        // Simulate human reading the homepage
-        await simulateHuman(win);
-        // Human-like pause before clicking elsewhere
-        await sleep(jitter(1000));
-      }
-      httpStatus = 200; // reset for next navigation
-    }
+    await warmUp(win, chain);
 
     // ── Step 2: Navigate to the deals page ──────────────────────────────
-    win.loadURL(chain.url);
-    const loadRes = await waitForLoad(win, NAV_TIMEOUT);
+    const nav = await win.go(chain.url, NAV_TIMEOUT);
 
-    if (loadRes === 'timeout') {
+    if (nav.res === 'timeout') {
       out.status = 'error'; out.error = 'Timeout'; return out;
     }
-    if (loadRes === 'failed') {
+    if (nav.res === 'failed') {
       out.status = 'error'; out.error = 'Navigation failed'; return out;
     }
-    if (httpStatus === 403 || httpStatus === 429) {
-      out.status = 'blocked'; out.error = `HTTP ${httpStatus}`; return out;
+    if (nav.status === 403 || nav.status === 429) {
+      out.status = 'blocked'; out.error = `HTTP ${nav.status}`; return out;
     }
-    if (httpStatus >= 400) {
-      out.status = 'error'; out.error = `HTTP ${httpStatus}`; return out;
+    if (nav.status >= 400) {
+      out.status = 'error'; out.error = `HTTP ${nav.status}`; return out;
     }
 
     // ── Step 3: Wait for SPA framework to render its components ─────────
@@ -437,8 +555,8 @@ async function scrapeChain(chain) {
     // ── Step 5: Run extraction script in live page context ───────────────
     const rawDeals = await win.webContents.executeJavaScript(EXTRACT_SCRIPT);
 
-    // ── Step 6: Find a photo for offers whose card had none ──────────────
-    await fillMissingImages(win, chain, rawDeals);
+    // ── Step 6: Verify each offer link; find photos for cards without one ─
+    await checkOffers(win, chain, rawDeals);
 
     out.deals = rawDeals.map(d => {
       const raw  = d.rawText || d.description || '';
@@ -454,6 +572,9 @@ async function scrapeChain(chain) {
         discountPct: pct,
         description: (d.description || d.title).slice(0, 280),
         bookingUrl:  d.bookingUrl || chain.url,
+        linkStatus:  d.linkStatus,
+        linkNote:    d.linkNote,
+        linkOriginal: d.linkOriginal || '',
         imageUrl:    d.imageUrl || '',
         imageAlt:    `${chain.name} hotel offer`,
         validFrom:   '',
@@ -493,6 +614,28 @@ module.exports.scrapeAll = async function (slugs, onProgress) {
   });
   await runConcurrent(tasks, CONCURRENCY);
   onProgress({ type: 'done' });
+};
+
+// Check the links of deals already saved (deals.md). One window per chain,
+// warmed up like a scrape so bot-protected sites let the checks through.
+// Calls onResult({ ...deal, status, note }) for each deal.
+module.exports.checkDealLinks = async function (deals, onResult) {
+  const bySlug = {};
+  for (const d of deals) (bySlug[d.chainSlug] = bySlug[d.chainSlug] || []).push(d);
+  const tasks = Object.entries(bySlug).map(([slug, list]) => async () => {
+    const chain = CHAINS.find(c => c.slug === slug) || { slug, name: list[0].chain || slug, url: '' };
+    const win = openChainWindow(chain);
+    try {
+      await warmUp(win, chain);
+      for (const d of list) {
+        const { status, note } = await verifyLink(win, d.bookingUrl, d.title, chain, '', true);
+        onResult({ ...d, status, note });
+      }
+    } finally {
+      try { win.destroy(); } catch {}
+    }
+  });
+  await runConcurrent(tasks, CONCURRENCY);
 };
 
 module.exports.scrapeOne = async function (slug, onProgress) {
