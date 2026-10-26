@@ -27,6 +27,12 @@ const RENDER_MS      = 4500;   // wait after did-finish-load for SPA render
 const WARMUP_MS      = 2800;   // wait on homepage before navigating to deals
 const NAV_TIMEOUT    = 45000;  // per-page timeout
 const WARMUP_TIMEOUT = 25000;  // homepage timeout (less strict)
+const DETAIL_TIMEOUT = 20000;  // offer detail page, visited only to find an image
+const MAX_DETAIL_VISITS = 6;   // per chain — keeps a full scrape reasonably quick
+const MIN_PHOTO_PX   = 320;    // narrower images are thumbnails, not card photos
+
+// URLs that are icons/logos rather than photos (path segment or file name match)
+const NOT_PHOTO_RE = /\.svg(\?|#|$)|(^|[\/_.-])(logo|icon|sprite|placeholder|spacer|blank)s?([\/_.-]|$)/i;
 
 const CHROME_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
@@ -209,19 +215,34 @@ const EXTRACT_SCRIPT = [
   '    for(var i=0;i<ps.length;i++){var m=t.match(ps[i]);if(m){var v=+m[1];if(v>0&&v<90)return v;}}',
   '    return 0;',
   '  }',
+  // Image picking: consider every <img>, <picture><source> and CSS background
+  // in the card, take the largest srcset rendition of each (currentSrc is often
+  // a lazy-load placeholder or a small rendition), skip icons/logos/SVGs, and
+  // return the widest. Known-small images (< MIN_W) are rejected outright.
+  '  var MIN_W=' + MIN_PHOTO_PX + ';',
+  '  function bad(u){ return !u||u.indexOf("data:")===0||' + NOT_PHOTO_RE + '.test(u); }',
+  '  function largest(ss){',
+  '    var top="",tw=-1;',
+  '    (ss||"").split(/,\\s+/).forEach(function(p){',
+  '      var a=p.trim().split(/\\s+/), d=a[1]||"";',
+  '      var w=/w$/.test(d)?parseInt(d,10):/x$/.test(d)?parseFloat(d):0;',
+  '      if(a[0]&&w>tw){tw=w;top=a[0];}',
+  '    });',
+  '    return {u:top,w:/w$/.test(ss||"")?tw:0};',
+  '  }',
   '  function img(el){',
-  '    var imgs=el.querySelectorAll("img");',
-  '    for(var i=0;i<imgs.length;i++){',
-  '      var s=imgs[i].currentSrc||imgs[i].src||imgs[i].getAttribute("data-src")||imgs[i].getAttribute("data-lazy-src")||imgs[i].getAttribute("data-original")||"";',
-  '      if(s && s.indexOf("data:")<0 && s.length>12) return s;',
-  '    }',
-  '    var bgs=[el].concat(Array.from(el.querySelectorAll("[style*=background]")));',
-  '    for(var j=0;j<bgs.length;j++){',
-  '      var bg=(bgs[j].style&&bgs[j].style.backgroundImage)||getComputedStyle(bgs[j]).backgroundImage||"";',
-  '      var bm=bg.match(/url\\(["\\"]?([^"\\")]+)["\\"]?\\)/);',
-  '      if(bm&&bm[1]&&bm[1].indexOf("data:")<0) return bm[1];',
-  '    }',
-  '    return "";',
+  '    var best={u:"",w:-1};',
+  '    function consider(u,w){ u=(u||"").trim(); if(!bad(u)&&w>best.w) best={u:u,w:w}; }',
+  '    el.querySelectorAll("img,picture source").forEach(function(i){',
+  '      var ss=largest(i.getAttribute("srcset")||i.getAttribute("data-srcset"));',
+  '      var w=Math.max(ss.w,i.naturalWidth||0,parseInt(i.getAttribute("width"),10)||0);',
+  '      consider(ss.u||i.getAttribute("data-src")||i.getAttribute("data-lazy-src")||i.getAttribute("data-original")||i.currentSrc||i.src,w);',
+  '    });',
+  '    [el].concat(Array.from(el.querySelectorAll("[style*=background]"))).forEach(function(b){',
+  '      var m=(getComputedStyle(b).backgroundImage||"").match(/url\\(["\\x27]?([^"\\x27)]+)["\\x27]?\\)/);',
+  '      if(m) consider(m[1],b.offsetWidth||0);',
+  '    });',
+  '    return best.u&&(best.w===0||best.w>=MIN_W) ? res(best.u) : "";',
   '  }',
   '  var SELS=[',
   '    "[class*=\\"offer-card\\"]","[class*=\\"offerCard\\"]","[class*=\\"offer_card\\"]",',
@@ -299,6 +320,43 @@ const EXTRACT_SCRIPT = [
   '  return deals;',
   '})();',
 ].join('\n');
+
+// Page-level share image — used for offers whose card had no usable photo
+const OG_IMAGE_SCRIPT = [
+  '(function(){',
+  '  var m=document.querySelector(\'meta[property="og:image"],meta[name="og:image"],meta[name="twitter:image"],meta[property="twitter:image"]\');',
+  '  if(!m||!m.content) return "";',
+  '  try{ return new URL(m.content,location.href).href; }catch(e){ return ""; }',
+  '})();',
+].join('\n');
+
+const isPhotoUrl = u => !!u && /^https?:\/\//.test(u) && !NOT_PHOTO_RE.test(u);
+
+// Visit each image-less offer's own page and take its og:image, falling back
+// to the listing page's og:image so every scraped deal arrives with a photo.
+async function fillMissingImages(win, chain, deals) {
+  let listingImg = '';
+  try { listingImg = await win.webContents.executeJavaScript(OG_IMAGE_SCRIPT); } catch {}
+  if (!isPhotoUrl(listingImg)) listingImg = '';
+
+  const missing = deals.filter(d => !d.imageUrl);
+  let visits = 0;
+  for (const d of missing) {
+    const url = d.bookingUrl;
+    if (visits < MAX_DETAIL_VISITS && url && url !== chain.url && /^https?:\/\//.test(url)) {
+      visits++;
+      win.loadURL(url);
+      if (await waitForLoad(win, DETAIL_TIMEOUT) === 'loaded') {
+        await sleep(jitter(1500));
+        try {
+          const og = await win.webContents.executeJavaScript(OG_IMAGE_SCRIPT);
+          if (isPhotoUrl(og)) { d.imageUrl = og; continue; }
+        } catch {}
+      }
+    }
+    d.imageUrl = listingImg;
+  }
+}
 
 // ── Single chain scraper ───────────────────────────────────────────────────
 async function scrapeChain(chain) {
@@ -378,6 +436,9 @@ async function scrapeChain(chain) {
 
     // ── Step 5: Run extraction script in live page context ───────────────
     const rawDeals = await win.webContents.executeJavaScript(EXTRACT_SCRIPT);
+
+    // ── Step 6: Find a photo for offers whose card had none ──────────────
+    await fillMissingImages(win, chain, rawDeals);
 
     out.deals = rawDeals.map(d => {
       const raw  = d.rawText || d.description || '';

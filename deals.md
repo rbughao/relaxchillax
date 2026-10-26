@@ -65,7 +65,7 @@ Stay longer and save — book at least 7 days in advance and enjoy up to 20% off
 - discountPct: 40
 - validFrom:
 - validUntil: 2026-06-01
-- imageUrl: https://www.hilton.com/im/en/MLEONWA/19713044/beach-villa-ext-2113-v2.jpg
+- imageUrl: https://www.hilton.com/im/en/MLEONWA/19713044/beach-villa-ext-2113-v2.jpg?impolicy=resize&rw=800&rh=600
 - imageAlt: Hilton modern hotel room with stylish bed
 - bookingUrl: https://www.hilton.com/en/offers/the-hilton-sale-2000001498/
 - location:
@@ -83,7 +83,7 @@ The Hilton Sale: Honors members save up to 40% — book by June 1, 2026. Non-mem
 - discountPct: 30
 - validFrom:
 - validUntil: 2026-12-31
-- imageUrl: https://www.hilton.com/im/en/MLEONWA/19713044/beach-villa-ext-2113-v2.jpg
+- imageUrl: https://www.hilton.com/im/en/MLEONWA/19713044/beach-villa-ext-2113-v2.jpg?impolicy=resize&rw=800&rh=600
 - imageAlt: Hilton Honors clean hotel room with white and gray pillows
 - bookingUrl: https://www.hilton.com/en/offers/
 - location:
@@ -101,7 +101,7 @@ Exclusive rate for Hilton Honors members — up to 30% off your next stay at any
 - discountPct: 15
 - validFrom:
 - validUntil: 2026-12-31
-- imageUrl: https://www.hilton.com/im/en/MLEONWA/19713044/beach-villa-ext-2113-v2.jpg
+- imageUrl: https://www.hilton.com/im/en/MLEONWA/19713044/beach-villa-ext-2113-v2.jpg?impolicy=resize&rw=800&rh=600
 - imageAlt: Hilton hotel exterior near airport
 - bookingUrl: https://www.hilton.com/en/offers/
 - location:
@@ -713,7 +713,7 @@ Stay at an Autograph Collection hotel with curated local cultural experiences an
 - discountPct: 25
 - validFrom:
 - validUntil: 2026-12-31
-- imageUrl: https://www.hilton.com/im/en/SINORHI/14530273/f-por-157-heroimage-crop3-2.jpg
+- imageUrl: https://www.hilton.com/im/en/SINORHI/14530273/f-por-157-heroimage-crop3-2.jpg?impolicy=resize&rw=800&rh=533
 - imageAlt: Curio Collection distinctive hotel with pool
 - bookingUrl: https://www.hilton.com/en/offers/curio-collection/
 - location:
@@ -731,7 +731,7 @@ Hilton Honors members get exclusive rates at hand-selected Curio Collection inde
 - discountPct: 20
 - validFrom:
 - validUntil: 2026-12-31
-- imageUrl: https://www.hilton.com/im/en/SINORHI/14530273/f-por-157-heroimage-crop3-2.jpg
+- imageUrl: https://www.hilton.com/im/en/SINORHI/14530273/f-por-157-heroimage-crop3-2.jpg?impolicy=resize&rw=800&rh=533
 - imageAlt: Curio Collection hotel with local character and ocean view
 - bookingUrl: https://www.hilton.com/en/offers/curio-collection/
 - location:
@@ -749,7 +749,7 @@ Immerse yourself in local culture with a Curio Collection property — includes 
 - discountPct: 15
 - validFrom:
 - validUntil: 2026-12-31
-- imageUrl: https://www.hilton.com/im/en/SINORHI/14530273/f-por-157-heroimage-crop3-2.jpg
+- imageUrl: https://www.hilton.com/im/en/SINORHI/14530273/f-por-157-heroimage-crop3-2.jpg?impolicy=resize&rw=800&rh=533
 - imageAlt: Curio Collection boutique hotel pool weekend
 - bookingUrl: https://www.hilton.com/en/offers/curio-collection/
 - location:

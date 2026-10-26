@@ -253,17 +253,6 @@
     background: var(--bg2);
   }
   .rec-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .rec-img-wrap img.logo-img,
-  .deal-img-wrap img.logo-img {
-    object-fit: contain;
-    padding: 28px 40px;
-    background: #ffffff;
-  }
-  @media (prefers-color-scheme: dark) {
-    .rec-img-wrap img.logo-img, .deal-img-wrap img.logo-img { background: #1a2035; }
-  }
-  :root[data-theme="dark"] .rec-img-wrap img.logo-img,
-  :root[data-theme="dark"] .deal-img-wrap img.logo-img { background: #1a2035; }
   .rec-img-gradient {
     position: absolute;
     inset: 0;
@@ -623,8 +612,49 @@
   }
   .deal-cta:hover { background: var(--teal); color: #FFFFFF; }
 
+  /* ── Brand tile — stands in for a missing photo ──
+     The logo plate has a fixed size, so every logo shows at the same visual
+     weight whatever its source dimensions. Logos too small to look sharp
+     are dropped and only the chain name is shown (.no-logo). */
+  .brand-tile {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  }
+  .rec-img-wrap .brand-tile { padding-bottom: 48px; }  /* clear the title overlay */
+  .brand-plate {
+    width: 76px;
+    height: 76px;
+    padding: 12px;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    flex-shrink: 0;
+  }
+  .brand-tile .brand-plate img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    text-align: center;
+    padding: 0 16px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+  }
+  .brand-tile.no-logo .brand-name { font-size: 24px; letter-spacing: 0.5px; }
+
   /* ── Chain placeholder gradients (keep vivid — they sit inside image area) ── */
   [class*="placeholder-"] { background-size: cover; background-position: center; }
+  .placeholder-aman        { background: linear-gradient(135deg, #3d3a33 0%, #6b6355 100%); }
+  .placeholder-kempinski   { background: linear-gradient(135deg, #1c1917 0%, #57452a 100%); }
+  .placeholder-rosewood    { background: linear-gradient(135deg, #1f3b2d 0%, #3f6b4f 100%); }
+  .placeholder-millennium  { background: linear-gradient(135deg, #2b1a3d 0%, #5b3b7a 100%); }
   .placeholder-marriott    { background: linear-gradient(135deg, #1a0a2e 0%, #16213e 100%); }
   .placeholder-hilton      { background: linear-gradient(135deg, #003366 0%, #004e92 100%); }
   .placeholder-ihg         { background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%); }
@@ -898,16 +928,13 @@ let chainMeta = [];
 const TIER_COLORS = { 1: '#A8802A', 2: '#0D8B80', 3: '#7C5FCA', 4: '#3B78B8' };
 const TIER_LABELS  = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Tier 4' };
 
-// SVG text logos for chains where the Google favicon is too low-res or blurry.
-const LOGO_SVG = {
-  wyndham:    "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 80'><rect width='320' height='80' fill='white'/><text x='160' y='52' font-family='Arial,sans-serif' font-size='34' font-weight='700' fill='%23003087' text-anchor='middle' letter-spacing='1'>WYNDHAM</text></svg>",
-  bestwestern:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 88'><rect width='320' height='88' fill='white'/><text x='160' y='36' font-family='Arial,sans-serif' font-size='21' font-weight='700' fill='%23004B8D' text-anchor='middle'>BEST WESTERN</text><text x='160' y='68' font-family='Arial,sans-serif' font-size='21' font-weight='700' fill='%23CC9900' text-anchor='middle' letter-spacing='3'>REWARDS</text></svg>",
-};
+// Below these natural widths an image would be upscaled into a blur.
+const MIN_PHOTO_PX = 320;  // deal photo shown ~380px wide
+const MIN_LOGO_PX  = 96;   // logo plate is 52px inside, sharp up to ~2x DPR
 
 // Google's favicon service — used when a deal has no real photo.
-// Returns each brand's high-quality icon at 256px; no API key, no CORS issues.
+// Returns the largest icon each brand publishes (16–256px; checked by checkLogo).
 function chainLogoUrl(slug) {
-  if (LOGO_SVG[slug]) return LOGO_SVG[slug];
   const domains = {
     marriott:     'marriott.com',
     hilton:       'hilton.com',
@@ -918,6 +945,8 @@ function chainLogoUrl(slug) {
     aman:         'aman.com',
     kempinski:    'kempinski.com',
     rosewood:     'rosewoodhotels.com',
+    wyndham:      'wyndhamhotels.com',
+    bestwestern:  'bestwestern.com',
     choicehotels: 'choicehotels.com',
     radisson:     'radissonhotels.com',
     melia:        'melia.com',
@@ -937,22 +966,45 @@ function chainLogoUrl(slug) {
   return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=256` : null;
 }
 
-// Returns true only for real HTTP(S) photo URLs — not null, empty, or data: URIs
+// Returns true only for HTTP(S) photo URLs — not empty, data: URIs or SVG icons
 function hasRealImage(url) {
-  return !!(url && !url.startsWith('data:') && url.startsWith('http'));
+  return !!(url && url.startsWith('http') && !/\.svg(\?|#|$)/i.test(url));
 }
 
-// Called by img onerror — swaps failed photo for chain logo, or hides the img
-function imgFail(el, slug) {
-  el.onerror = null;
+// Card media: the deal photo, or the brand tile when there is none
+function dealMedia(deal, eager) {
+  if (!hasRealImage(deal.imageUrl)) return brandTileHtml(deal.chainSlug, deal.chain);
+  return `<img src="${escHtml(deal.imageUrl)}" alt="${escHtml(deal.imageAlt || deal.title)}"
+    data-slug="${escHtml(deal.chainSlug)}" data-chain="${escHtml(deal.chain)}"
+    ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" referrerpolicy="no-referrer"
+    onload="checkPhoto(this)" onerror="photoFail(this)">`;
+}
+
+function brandTileHtml(slug, chain) {
   const logo = chainLogoUrl(slug);
-  if (logo && el.src !== logo) {
-    el.src = logo;
-    el.classList.add('logo-img');
-    el.parentElement.classList.add('logo-bg');
-  } else {
-    el.style.display = 'none';
-  }
+  return `<div class="brand-tile placeholder-${escHtml(slug)}${logo ? '' : ' no-logo'}">
+    ${logo ? `<div class="brand-plate"><img src="${logo}" alt="" onload="checkLogo(this)" onerror="dropLogo(this)"></div>` : ''}
+    <span class="brand-name">${escHtml(chain)}</span>
+  </div>`;
+}
+
+// A photo that loaded but is only a thumbnail or icon is treated as missing
+function checkPhoto(el) {
+  if (el.naturalWidth < MIN_PHOTO_PX) photoFail(el);
+}
+function photoFail(el) {
+  el.onload = el.onerror = null;
+  el.outerHTML = brandTileHtml(el.dataset.slug, el.dataset.chain);
+}
+
+// Low-res favicons would blur in the plate — show the chain name alone instead
+function checkLogo(el) {
+  if (el.naturalWidth < MIN_LOGO_PX) dropLogo(el);
+}
+function dropLogo(el) {
+  const tile = el.closest('.brand-tile');
+  el.parentElement.remove();
+  tile.classList.add('no-logo');
 }
 
 const CHAINS = [
@@ -1141,13 +1193,13 @@ function renderRecommended() {
     const extras = allDeals.filter(d => !d.isRecommended).sort((a, b) => b.discountPct - a.discountPct);
     recs = [...recs, ...extras].slice(0, 5);
   }
-  recs.forEach(deal => {
+  recs.forEach((deal, i) => {
     const card = document.createElement('div');
     card.className = 'rec-card';
     const tc = TIER_COLORS[deal.tier] || '#888';
     card.innerHTML = `
-      <div class="rec-img-wrap">
-        ${(() => { const ri = hasRealImage(deal.imageUrl), lo = chainLogoUrl(deal.chainSlug); const src = ri ? deal.imageUrl : lo; return src ? `<img src="${escHtml(src)}" alt="${escHtml(ri ? (deal.imageAlt || deal.title) : deal.chain + ' logo')}" loading="lazy" ${ri ? `onerror="imgFail(this,'${deal.chainSlug}')"` : 'class="logo-img"'}>` : ''; })()}
+      <div class="rec-img-wrap placeholder-${escHtml(deal.chainSlug)}">
+        ${dealMedia(deal, i < 3)}
         <div class="rec-img-gradient"></div>
         <span class="tier-badge" style="background:${tc}">${TIER_LABELS[deal.tier]}</span>
         <div class="rec-ribbon">Recommended</div>
@@ -1272,8 +1324,8 @@ function renderGrid(deals) {
     const tc = TIER_COLORS[deal.tier] || '#888';
     const tags = (deal.tags || []).slice(0, 3);
     card.innerHTML = `
-      <div class="deal-img-wrap placeholder-${deal.chainSlug}">
-        ${(() => { const ri = hasRealImage(deal.imageUrl), lo = chainLogoUrl(deal.chainSlug); const src = ri ? deal.imageUrl : lo; return src ? `<img src="${escHtml(src)}" alt="${escHtml(ri ? (deal.imageAlt || deal.title) : deal.chain + ' logo')}" loading="lazy" ${ri ? `onerror="imgFail(this,'${deal.chainSlug}')"` : 'class="logo-img"'}>` : ''; })()}
+      <div class="deal-img-wrap placeholder-${escHtml(deal.chainSlug)}">
+        ${dealMedia(deal, false)}
         <div class="deal-chain-badge">
           <span class="chain-dot-sm" style="background:${tc}"></span>
           <span>${escHtml(deal.chain)}</span>
