@@ -46,26 +46,26 @@ const CHROME_UA =
 const CHAINS = [
   { slug:'marriott',     name:'Marriott',              tier:1, url:'https://www.marriott.com/offers.mi' },
   { slug:'hilton',       name:'Hilton',                tier:1, url:'https://www.hilton.com/en/offers/' },
-  { slug:'ihg',          name:'IHG',                   tier:1, url:'https://www.ihg.com/hotels/us/en/offers' },
+  { slug:'ihg',          name:'IHG',                   tier:1, url:'https://www.ihg.com/content/us/en/offers' },
   { slug:'hyatt',        name:'Hyatt',                 tier:1, url:'https://www.hyatt.com/offers' },
-  { slug:'accor',        name:'Accor',                 tier:1, url:'https://all.accor.com/a/en.html' },
+  { slug:'accor',        name:'Accor',                 tier:1, url:'https://all.accor.com/a/en/deals-corner.html' },
   { slug:'banyantree',   name:'Banyan Tree',           tier:1, url:'https://www.banyantree.com/en/offers' },
-  { slug:'aman',         name:'Aman',                  tier:1, url:'https://www.aman.com/offers' },
+  { slug:'aman',         name:'Aman',                  tier:1, url:'https://www.aman.com/exclusive-offers' },
   { slug:'kempinski',    name:'Kempinski',             tier:1, url:'https://www.kempinski.com/en/offers' },
   { slug:'rosewood',     name:'Rosewood Hotels',       tier:1, url:'https://www.rosewoodhotels.com/en/offers' },
   { slug:'wyndham',      name:'Wyndham',               tier:2, url:'https://www.wyndhamhotels.com/hotel-deals' },
   { slug:'bestwestern',  name:'Best Western',          tier:2, url:'https://www.bestwestern.com/en_US/hotels/deals-and-offers.html' },
   { slug:'choicehotels', name:'Choice Hotels',         tier:2, url:'https://www.choicehotels.com/deals' },
-  { slug:'radisson',     name:'Radisson',              tier:2, url:'https://www.radissonhotels.com/en-us/offers' },
+  { slug:'radisson',     name:'Radisson',              tier:2, url:'https://www.radissonhotels.com/en-us/hotel-deals' },
   { slug:'melia',        name:'Melia Hotels',          tier:2, url:'https://www.melia.com/en/offers' },
   { slug:'millennium',   name:'Millennium Hotels',     tier:2, url:'https://www.millenniumhotels.com/en/offers/' },
-  { slug:'kimpton',      name:'Kimpton Hotels',        tier:3, url:'https://www.ihg.com/kimptonhotels/hotels/us/en/offers' },
+  { slug:'kimpton',      name:'Kimpton Hotels',        tier:3, url:'https://www.ihg.com/kimptonhotels/content/us/en/stay/special-offers' },
   { slug:'autograph',    name:'Autograph Collection',  tier:3, url:'https://autograph-hotels.marriott.com/offers/' },
-  { slug:'curio',        name:'Curio Collection',      tier:3, url:'https://www.hilton.com/en/p/curio-collection/' },
+  { slug:'curio',        name:'Curio Collection',      tier:3, url:'https://www.hilton.com/en/offers/curio-collection/' },
   { slug:'tribute',      name:'Tribute Portfolio',     tier:3, url:'https://tribute-portfolio.marriott.com/' },
   { slug:'hardrock',     name:'Hard Rock Hotels',      tier:3, url:'https://hotel.hardrock.com/offers.aspx' },
-  { slug:'motel6',       name:'Motel 6',               tier:4, url:'https://www.motel6.com/en/deals.html' },
-  { slug:'extendedstay', name:'Extended Stay America', tier:4, url:'https://www.extendedstayamerica.com/deals' },
+  { slug:'motel6',       name:'Motel 6',               tier:4, url:'https://www.motel6.com/pages/motel6-coupons/' },
+  { slug:'extendedstay', name:'Extended Stay America', tier:4, url:'https://www.extendedstayamerica.com/special-offers' },
   { slug:'laquinta',     name:'La Quinta',             tier:4, url:'https://www.laquinta.com/hotel-deals' },
   { slug:'redroof',      name:'Red Roof Inn',          tier:4, url:'https://www.redroof.com/deals' },
   { slug:'studio6',      name:'Studio 6',              tier:4, url:'https://www.staystudio6.com/en/deals.html' },
@@ -535,6 +535,11 @@ async function scrapeChain(chain) {
     }
     if (nav.status >= 400) {
       out.status = 'error'; out.error = `HTTP ${nav.status}`; return out;
+    }
+    // A moved offers page often redirects home, where the extractor would
+    // pick up navigation labels as "offers" — stop and ask for a new URL.
+    if (isHomePage(nav.url, chain)) {
+      out.status = 'error'; out.error = 'Offers URL redirects to the homepage — update it in CHAINS'; return out;
     }
 
     // ── Step 3: Wait for SPA framework to render its components ─────────
